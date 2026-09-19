@@ -1,0 +1,107 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: demurrageos-postgres
+    environment:
+      POSTGRES_USER: demurrage
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: demurrageos
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U demurrage"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: demurrageos-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: demurrageos-api
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://demurrage:password@postgres:5432/demurrageos
+      REDIS_URL: redis://redis:6379
+      PORT: 3000
+      JWT_SECRET: dev-secret-key
+      SESSION_SECRET: dev-session-secret
+      AI_SERVICE_URL: http://ai-service:5000
+      LOG_LEVEL: info
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./apps/api/src:/app/src
+    command: npm run dev
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  worker:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: demurrageos-worker
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://demurrage:password@postgres:5432/demurrageos
+      REDIS_URL: redis://redis:6379
+      LOG_LEVEL: info
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./apps/api/src:/app/src
+    command: npm run worker
+
+  ai-service:
+    build:
+      context: ./apps/ai-service
+      dockerfile: Dockerfile
+    container_name: demurrageos-ai
+    environment:
+      FLASK_ENV: development
+      LOG_LEVEL: INFO
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./apps/ai-service/app:/app
+
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+    container_name: demurrageos-web
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:3000
+    ports:
+      - "3001:3000"
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:

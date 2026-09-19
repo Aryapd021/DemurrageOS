@@ -1,0 +1,616 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// TENANCY & AUTHENTICATION
+// ============================================================================
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  type      String   @default("CHA") // CHA, FREIGHT_FORWARDER, CARRIER
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users   User[]
+  clients Client[]
+
+  @@map("organizations")
+}
+
+model User {
+  id             String   @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  email          String   @unique
+  name           String
+  role           String   @default("VIEWER") // OWNER, ADMIN, OPERATIONS, CHA_USER, FINANCE, VIEWER
+  passwordHash   String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  sessions    Session[]
+  auditLogs   AuditLog[]
+  taskAssignments Task[] @relation("assignedTo")
+
+  @@index([organizationId])
+  @@index([email])
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+// ============================================================================
+// CLIENTS & SHIPMENTS
+// ============================================================================
+
+model Client {
+  id             String   @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  name           String
+  iecCode        String?  @unique
+  gstin          String?
+  contactName    String?
+  contactEmail   String?
+  contactPhone   String?
+  aeoStatus      String   @default("NONE") // NONE, CERTIFIED, SUSPENDED
+  acpStatus      String   @default("NONE") // NONE, CERTIFIED, SUSPENDED
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  containers     Container[]
+  shipments      Shipment[]
+
+  @@index([organizationId])
+  @@index([iecCode])
+  @@map("clients")
+}
+
+model Shipment {
+  id          String   @id @default(cuid())
+  clientId    String
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  referenceNo String
+  poNo        String?
+  invoiceNo   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  containers  Container[]
+
+  @@index([clientId])
+  @@index([referenceNo])
+  @@map("shipments")
+}
+
+// ============================================================================
+// CONTAINERS & LOGISTICS
+// ============================================================================
+
+model Container {
+  id              String   @id @default(cuid())
+  clientId        String
+  client          Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  shipmentId      String?
+  shipment        Shipment? @relation(fields: [shipmentId], references: [id], onDelete: SetNull)
+
+  // Container identity
+  containerNo     String   @unique
+  containerType   String   @default("20FT") // 20FT, 40FT, 40HC
+  portOfLoading   String?
+  portOfDischarge String?
+
+  // Delivery mode
+  deliveryMode    String   @default("CFS") // DPD_DIRECT, DPD_CFS, CFS
+
+  // Logistics
+  carrierId       String?
+  carrier         Carrier? @relation(fields: [carrierId], references: [id], onDelete: SetNull)
+
+  cfsId           String?
+  cfs             CFS?     @relation(fields: [cfsId], references: [id], onDelete: SetNull)
+
+  // Discharge information
+  dischargeDate   DateTime?
+  dischargePort   String?
+
+  // Goods information
+  hsCode          String?
+  goodsDescription String?
+  quantity        Int?
+  uom             String?  // Unit of Measure
+  declaredValue   Decimal? @db.Numeric(15, 2)
+  currency        String?  @default("USD")
+
+  // Flags
+  riskScore       Float?
+  riskLevel       String?  @default("LOW") // LOW, MEDIUM, HIGH, CRITICAL
+  alertCount      Int      @default(0)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  events          ContainerEvent[]
+  charges         Charge[]
+  alerts          Alert[]
+  tasks           Task[]
+  documents       Document[]
+  complianceSignals ComplianceSignal[]
+
+  @@index([clientId])
+  @@index([containerNo])
+  @@index([deliveryMode])
+  @@index([carrierId])
+  @@index([cfsId])
+  @@index([riskLevel])
+  @@map("containers")
+}
+
+model ContainerEvent {
+  id              String   @id @default(cuid())
+  containerId     String
+  container       Container @relation(fields: [containerId], references: [id], onDelete: Cascade)
+
+  // Event identity
+  eventType       String   // CFS_GATE_IN, CFS_GATE_OUT, DPD_TO_CFS_FALLBACK, etc.
+  source          String   // CSV, EDI, MANUAL, SYSTEM
+  sourceEventId   String?  // Original event ID from source
+
+  // Timestamps
+  eventTimestamp  DateTime
+  receivedTimestamp DateTime @default(now())
+  timezone        String?
+
+  // Metadata & Idempotency
+  metadata        String?  @db.Json
+  idempotencyKey  String?
+
+  createdAt       DateTime @default(now())
+
+  @@unique([containerId, eventType, eventTimestamp, sourceEventId], name: "unique_event_identity")
+  @@index([containerId])
+  @@index([eventType])
+  @@index([eventTimestamp])
+  @@map("container_events")
+}
+
+// ============================================================================
+// PORTS & INFRASTRUCTURE
+// ============================================================================
+
+model Port {
+  id      String @id @default(cuid())
+  code    String @unique
+  name    String
+  country String?
+
+  cfsList CFS[]
+
+  @@map("ports")
+}
+
+model CFS {
+  id       String @id @default(cuid())
+  portId   String
+  port     Port   @relation(fields: [portId], references: [id], onDelete: Cascade)
+  name     String
+  address  String?
+  contactPhone String?
+
+  containers Container[]
+
+  @@index([portId])
+  @@map("cfs")
+}
+
+model Carrier {
+  id   String @id @default(cuid())
+  code String @unique
+  name String
+
+  containers Container[]
+
+  @@map("carriers")
+}
+
+model Customs {
+  id          String @id @default(cuid())
+  code        String @unique
+  name        String
+  authority   String?
+
+  @@map("customs")
+}
+
+// ============================================================================
+// FINANCIAL
+// ============================================================================
+
+model Tariff {
+  id              String   @id @default(cuid())
+  code            String   @unique
+  name            String
+  version         Int      @default(1)
+
+  // Validity
+  effectiveFrom   DateTime
+  effectiveTo     DateTime?
+
+  // Rates
+  demurrageRate   Decimal  @db.Numeric(15, 4)
+  detentionRate   Decimal  @db.Numeric(15, 4)
+  storageRate     Decimal? @db.Numeric(15, 4)
+  groundRentRate  Decimal? @db.Numeric(15, 4)
+
+  // Slabs
+  freeDays        Int      @default(5)
+  gracePeriod     Int      @default(0)
+
+  // Metadata
+  currency        String   @default("INR")
+  rounding        String   @default("HALF_UP")
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  charges Charge[]
+
+  @@index([effectiveFrom])
+  @@index([effectiveTo])
+  @@map("tariffs")
+}
+
+model Charge {
+  id              String   @id @default(cuid())
+  containerId     String
+  container       Container @relation(fields: [containerId], references: [id], onDelete: Cascade)
+
+  tariffId        String?
+  tariff          Tariff?  @relation(fields: [tariffId], references: [id], onDelete: SetNull)
+
+  // Calculation
+  chargeType      String   // DEMURRAGE, DETENTION, STORAGE, GROUND_RENT, SHIFTING_CHARGE
+  amount          Decimal  @db.Numeric(15, 2)
+  currency        String   @default("INR")
+
+  // Free time & exposure
+  freeDaysRemaining Int?
+  daysOverdue     Int?
+
+  // Calculation provenance
+  calculationVersion String?
+  calculationInputs String? @db.Json
+  tariffVersion   Int?
+  appliedTariffEffectiveFrom DateTime?
+  appliedTariffEffectiveTo DateTime?
+
+  // Status
+  status          String   @default("ACTIVE") // ACTIVE, WAIVED, DISPUTED, PAID
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  auditLogs       AuditLog[]
+
+  @@index([containerId])
+  @@index([chargeType])
+  @@index([status])
+  @@map("charges")
+}
+
+// ============================================================================
+// RISK & COMPLIANCE
+// ============================================================================
+
+model ComplianceSignal {
+  id              String   @id @default(cuid())
+  containerId     String
+  container       Container @relation(fields: [containerId], references: [id], onDelete: Cascade)
+
+  signalType      String   // DOC_COMPLETENESS, HS_CODE_NOVELTY, AEO_ACP_STATUS, VALUATION_CONSISTENCY
+  score           Float    @db.Numeric(5, 2)
+  source          String   @default("MANUAL") // MANUAL, DERIVED, AI
+
+  metadata        String?  @db.Json
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([containerId])
+  @@index([signalType])
+  @@map("compliance_signals")
+}
+
+model Alert {
+  id              String   @id @default(cuid())
+  containerId     String
+  container       Container @relation(fields: [containerId], references: [id], onDelete: Cascade)
+
+  alertType       String   // DEADLINE_URGENCY, CUSTOMS_DELAY, PICKUP_DELAY, FINANCIAL_EXPOSURE, OPERATIONAL_UNCERTAINTY
+  severity        String   @default("MEDIUM") // LOW, MEDIUM, HIGH, CRITICAL
+  message         String
+
+  status          String   @default("ACTIVE") // ACTIVE, RESOLVED, ACKNOWLEDGED
+  resolvedAt      DateTime?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([containerId])
+  @@index([severity])
+  @@index([status])
+  @@map("alerts")
+}
+
+// ============================================================================
+// TASKS & NOTIFICATIONS
+// ============================================================================
+
+model Task {
+  id              String   @id @default(cuid())
+  containerId     String
+  container       Container @relation(fields: [containerId], references: [id], onDelete: Cascade)
+
+  // Assignment
+  assigneeType    String   // INTERNAL_USER, EXTERNAL_CONTACT
+  assigneeId      String?
+  assignee        User?    @relation("assignedTo", fields: [assigneeId], references: [id], onDelete: SetNull)
+
+  // External contact
+  externalName    String?
+  externalEmail   String?
+  externalPhone   String?
+
+  // Token for external confirmation
+  confirmationTokenHash String?
+  confirmationTokenExpiresAt DateTime?
+  confirmedAt     DateTime?
+
+  // Task details
+  title           String
+  description     String?
+  status          String   @default("PENDING") // PENDING, ASSIGNED, CONFIRMED, COMPLETED, CANCELLED
+  priority        String   @default("MEDIUM") // LOW, MEDIUM, HIGH
+
+  dueDate         DateTime?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  auditLogs       AuditLog[]
+
+  @@index([containerId])
+  @@index([status])
+  @@index([confirmationTokenHash])
+  @@map("tasks")
+}
+
+model Notification {
+  id              String   @id @default(cuid())
+  taskId          String?
+  task            Task?    @relation(fields: [taskId], references: [id], onDelete: SetNull)
+
+  provider        String   // EMAIL, SMS, WHATSAPP
+  recipient       String
+
+  subject         String?
+  body            String
+
+  status          String   @default("PENDING") // PENDING, SENT, FAILED, DELIVERED
+  attempts        Int      @default(0)
+  maxAttempts     Int      @default(3)
+
+  error           String?
+
+  sentAt          DateTime?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([provider])
+  @@index([status])
+  @@map("notifications")
+}
+
+// ============================================================================
+// DOCUMENTS
+// ============================================================================
+
+model Document {
+  id              String   @id @default(cuid())
+  containerId     String
+  container       Container @relation(fields: [containerId], references: [id], onDelete: Cascade)
+
+  documentType    String   // BOL, BOE, CFS_GATE_PASS, CARRIER_INVOICE, etc.
+
+  // File metadata
+  filename        String
+  mimeType        String
+  size            Int      // bytes
+  uploadedBy      String?
+  uploadedAt      DateTime @default(now())
+
+  // Storage
+  storagePath     String
+  storageUrl      String?
+
+  // Status
+  status          String   @default("UPLOADED") // UPLOADED, EXTRACTING, EXTRACTED, REVIEW_PENDING, APPROVED, REJECTED
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  extractions     DocumentExtraction[]
+  auditLogs       AuditLog[]
+
+  @@index([containerId])
+  @@index([documentType])
+  @@index([status])
+  @@map("documents")
+}
+
+model DocumentExtraction {
+  id              String   @id @default(cuid())
+  documentId      String
+  document        Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  // Extraction result
+  extractedFields String   @db.Json // Structured extraction
+  confidence      Float    @db.Numeric(5, 2)
+  flaggedForReview Boolean  @default(false)
+
+  // Provenance
+  model           String?
+  modelVersion    String?
+  promptVersion   String?
+  extractionSchema String?
+
+  // Metadata
+  metadata        String?  @db.Json
+
+  // Status
+  status          String   @default("EXTRACTED") // EXTRACTED, ACCEPTED, CORRECTED, REJECTED
+
+  // Human correction
+  correctedBy     String?
+  correctionNotes String?
+  correctedAt     DateTime?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([documentId])
+  @@index([status])
+  @@map("document_extractions")
+}
+
+// ============================================================================
+// IMPORTS
+// ============================================================================
+
+model Import {
+  id              String   @id @default(cuid())
+  organizationId  String
+
+  filename        String
+  fileSize        Int
+
+  // Status
+  status          String   @default("STAGED") // STAGED, PREVIEW_READY, CONFIRMED, PROCESSING, COMPLETED, FAILED
+
+  totalRows       Int      @default(0)
+  successCount    Int      @default(0)
+  errorCount      Int      @default(0)
+
+  // Metadata
+  uploadedAt      DateTime @default(now())
+  confirmedAt     DateTime?
+  completedAt     DateTime?
+
+  error           String?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  rows            ImportRow[]
+
+  @@index([organizationId])
+  @@index([status])
+  @@map("imports")
+}
+
+model ImportRow {
+  id              String   @id @default(cuid())
+  importId        String
+  import          Import   @relation(fields: [importId], references: [id], onDelete: Cascade)
+
+  // Row data
+  rowNumber       Int
+  data            String   @db.Json
+
+  // Validation
+  status          String   @default("PENDING") // PENDING, VALIDATED, ERROR
+  errors          String?  @db.Json
+
+  // Result
+  createdContainerId String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([importId])
+  @@index([status])
+  @@map("import_rows")
+}
+
+// ============================================================================
+// AUDIT & EVENTS
+// ============================================================================
+
+model AuditLog {
+  id              String   @id @default(cuid())
+  organizationId  String   // Denormalized for filtering
+  userId          String?
+  user            User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  action          String   // CREATE, UPDATE, DELETE, APPROVE, REJECT, ASSIGN, CONFIRM, etc.
+  entityType      String   // Container, Charge, Task, Document, etc.
+  entityId        String
+
+  beforeState     String?  @db.Json
+  afterState      String?  @db.Json
+
+  // Request context
+  requestId       String?
+  ipAddress       String?
+  userAgent       String?
+
+  // Calculation-specific
+  calculationVersion String?
+
+  createdAt       DateTime @default(now())
+
+  @@index([organizationId])
+  @@index([entityType])
+  @@index([entityId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model OutboxEvent {
+  id              String   @id @default(cuid())
+  aggregateType   String
+  aggregateId     String
+  eventType       String
+
+  payload         String   @db.Json
+
+  processed       Boolean  @default(false)
+  processedAt     DateTime?
+
+  createdAt       DateTime @default(now())
+
+  @@index([processed])
+  @@index([aggregateType])
+  @@map("outbox_events")
+}
