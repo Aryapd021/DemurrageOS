@@ -1,0 +1,10 @@
+node_modules
+.next
+.turbo
+apps/*/node_modules
+apps/*/.next
+packages/*/node_modules
+packages/*/dist
+brag-output
+*.pdf
+.git

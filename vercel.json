@@ -1,7 +1,5 @@
 {
-  "buildCommand": "cd ../.. && pnpm turbo build --filter=@demurrageos/web",
-  "outputDirectory": "apps/web/.next",
-  "installCommand": "pnpm install",
-  "framework": "nextjs",
-  "rootDirectory": "."
+  "installCommand": "corepack enable && pnpm install --no-frozen-lockfile",
+  "buildCommand": "pnpm --filter=@demurrageos/web run build",
+  "outputDirectory": "apps/web/.next"
 }

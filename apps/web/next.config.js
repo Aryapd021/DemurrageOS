@@ -1,8 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Standalone output for optimal deployment
-  output: 'standalone',
-
   // Allow all image domains
   images: {
     remotePatterns: [
