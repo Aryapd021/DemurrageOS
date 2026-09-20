@@ -3,25 +3,25 @@
 import React from "react";
 import { useClientScope } from "@/lib/stores/client-scope-context";
 import { formatINR } from "@/lib/utils";
-import { 
-  BarChart3, 
-  TrendingDown, 
-  Zap, 
-  AlertTriangle, 
-  Clock, 
-  Building2 
+import {
+  BarChart3,
+  TrendingDown,
+  Zap,
+  AlertTriangle,
+  Clock,
+  Building2,
 } from "lucide-react";
-import { 
-  ResponsiveContainer, 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  Tooltip, 
-  Legend, 
-  PieChart, 
-  Pie, 
-  Cell 
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  PieChart,
+  Pie,
+  Cell,
 } from "recharts";
 
 const MONTHLY_EXPOSURE_DATA = [
@@ -40,6 +40,36 @@ const CARRIER_VS_CFS = [
   { name: "Internal Shifting Charges", amount: 12000, color: "#ec4899" },
 ];
 
+const KPI_CARDS = [
+  {
+    label: "Total Avoidance Potential",
+    value: "₹27.9L",
+    valueClass: "text-emerald-600 dark:text-emerald-400",
+    borderColor: "#10b981",
+    icon: TrendingDown,
+    iconClass: "text-emerald-600 dark:text-emerald-400",
+    desc: "Historical preventable exposure saved in past 6 months",
+  },
+  {
+    label: "Avg DPD Fallback Rate",
+    value: "18.4%",
+    valueClass: "text-amber-600 dark:text-amber-400",
+    borderColor: "#f59e0b",
+    icon: AlertTriangle,
+    iconClass: "text-amber-600 dark:text-amber-400",
+    desc: "Containers missing 48hr window and transferring to CFS",
+  },
+  {
+    label: "DO Turnaround Time",
+    value: "1.2 Days",
+    valueClass: "text-blue-600 dark:text-blue-400",
+    borderColor: "#3b82f6",
+    icon: Clock,
+    iconClass: "text-blue-600 dark:text-blue-400",
+    desc: "Average time between vessel discharge and DO issuance",
+  },
+];
+
 export default function AnalyticsPage() {
   const { selectedClient, isClientScoped } = useClientScope();
 
@@ -47,70 +77,55 @@ export default function AnalyticsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <div className="text-xs font-semibold text-blue-600 uppercase tracking-wider">
-          Intelligence & Performance
+        <div className="text-xs font-semibold text-amber-600 dark:text-amber-500 uppercase tracking-wider">
+          Intelligence &amp; Performance
         </div>
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-          Root Cause & Preventable Exposure Analytics
+        <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight mt-0.5">
+          Root Cause &amp; Preventable Exposure Analytics
         </h1>
-        <p className="text-xs text-slate-500 mt-0.5">
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
           {isClientScoped
             ? `Targeted analytics for ${selectedClient?.name}`
             : "Aggregated CHA demurrage avoidance and root-cause benchmarking across all clients"}
         </p>
       </div>
 
-      {/* Top 3 KPI Cards */}
+      {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-1">
-          <div className="flex items-center justify-between text-slate-400">
-            <span className="text-[11px] font-bold uppercase tracking-wider">Total Avoidance Potential</span>
-            <TrendingDown className="w-4 h-4 text-emerald-500" />
-          </div>
-          <div className="text-2xl font-black font-mono text-emerald-600">
-            ₹27.9L
-          </div>
-          <span className="text-[11px] text-slate-500">
-            Historical preventable exposure saved in past 6 months
-          </span>
-        </div>
-
-        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-1">
-          <div className="flex items-center justify-between text-slate-400">
-            <span className="text-[11px] font-bold uppercase tracking-wider">Avg DPD Fallback Rate</span>
-            <AlertTriangle className="w-4 h-4 text-amber-500" />
-          </div>
-          <div className="text-2xl font-black font-mono text-amber-600">
-            18.4%
-          </div>
-          <span className="text-[11px] text-slate-500">
-            Containers missing 48hr window and transferring to CFS
-          </span>
-        </div>
-
-        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-1">
-          <div className="flex items-center justify-between text-slate-400">
-            <span className="text-[11px] font-bold uppercase tracking-wider">DO Turnaround Time</span>
-            <Clock className="w-4 h-4 text-blue-500" />
-          </div>
-          <div className="text-2xl font-black font-mono text-blue-600">
-            1.2 Days
-          </div>
-          <span className="text-[11px] text-slate-500">
-            Average time between vessel discharge and DO issuance
-          </span>
-        </div>
+        {KPI_CARDS.map((card) => {
+          const Icon = card.icon;
+          return (
+            <div
+              key={card.label}
+              className="rounded-xl p-5 space-y-2 transition-all duration-200 hover:translate-y-[-2px] bg-white dark:bg-[#0c1424] border border-slate-200 dark:border-white/5 shadow-sm dark:shadow-[0_4px_24px_rgba(0,0,0,0.3)]"
+              style={{
+                borderLeft: `3px solid ${card.borderColor}`,
+              }}
+            >
+              <div className="flex items-center justify-between text-slate-500">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  {card.label}
+                </span>
+                <Icon className={`w-4 h-4 ${card.iconClass}`} />
+              </div>
+              <div className={`text-2xl font-black font-mono ${card.valueClass}`}>
+                {card.value}
+              </div>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400">{card.desc}</span>
+            </div>
+          );
+        })}
       </div>
 
-      {/* Chart 1: Monthly Preventable vs Unavoidable */}
-      <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-4">
-        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+      {/* Chart 1: Monthly Bar */}
+      <div className="rounded-xl p-6 space-y-4 bg-white dark:bg-[#0c1424] border border-slate-200 dark:border-white/5 shadow-sm dark:shadow-[0_4px_24px_rgba(0,0,0,0.3)]">
+        <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-white/5">
           <div>
-            <h3 className="font-bold text-slate-900 text-sm">
+            <h3 className="font-bold text-slate-900 dark:text-white text-sm">
               Preventable vs. Unavoidable Exposure Trend
             </h3>
-            <p className="text-[11px] text-slate-500">
-              Green represents avoidable charges intercepted via early task assignment & document validation
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+              Green represents avoidable charges intercepted via early task assignment &amp; document validation
             </p>
           </div>
         </div>
@@ -118,13 +133,22 @@ export default function AnalyticsPage() {
         <div className="h-72 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={MONTHLY_EXPOSURE_DATA} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-              <XAxis dataKey="month" stroke="#94a3b8" fontSize={12} />
-              <YAxis stroke="#94a3b8" fontSize={12} tickFormatter={(val) => `₹${val / 100000}L`} />
+              <XAxis dataKey="month" stroke="#94a3b8" fontSize={12} tick={{ fill: "#64748b" }} />
+              <YAxis stroke="#94a3b8" fontSize={12} tick={{ fill: "#64748b" }} tickFormatter={(v) => `₹${v / 100000}L`} />
               <Tooltip
                 formatter={(val: number) => [`₹${val.toLocaleString("en-IN")}`, ""]}
-                contentStyle={{ backgroundColor: "#1e293b", borderColor: "#334155", color: "#fff", borderRadius: 8, fontSize: 12 }}
+                contentStyle={{
+                  backgroundColor: "#0f172a",
+                  borderColor: "rgba(255,255,255,0.1)",
+                  color: "#fff",
+                  borderRadius: 10,
+                  fontSize: 12,
+                  boxShadow: "0 20px 60px rgba(0,0,0,0.6)",
+                }}
               />
-              <Legend />
+              <Legend
+                wrapperStyle={{ fontSize: 11, color: "#64748b" }}
+              />
               <Bar dataKey="preventable" name="Preventable Avoidance" fill="#10b981" radius={[4, 4, 0, 0]} />
               <Bar dataKey="unavoidable" name="Statutory / Inevitable" fill="#94a3b8" radius={[4, 4, 0, 0]} />
             </BarChart>
@@ -132,13 +156,13 @@ export default function AnalyticsPage() {
         </div>
       </div>
 
-      {/* Chart 2: Carrier Demurrage vs CFS Ground Rent */}
-      <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-4">
-        <div className="border-b border-slate-100 pb-3">
-          <h3 className="font-bold text-slate-900 text-sm">
+      {/* Chart 2: Pie + Legend */}
+      <div className="rounded-xl p-6 space-y-4 bg-white dark:bg-[#0c1424] border border-slate-200 dark:border-white/5 shadow-sm dark:shadow-[0_4px_24px_rgba(0,0,0,0.3)]">
+        <div className="pb-3 border-b border-slate-100 dark:border-white/5">
+          <h3 className="font-bold text-slate-900 dark:text-white text-sm">
             Current Exposure Composition by Charge Channel
           </h3>
-          <p className="text-[11px] text-slate-500">
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
             Comparing carrier discharge clock demurrage vs. post-fallback CFS ground rent
           </p>
         </div>
@@ -153,32 +177,42 @@ export default function AnalyticsPage() {
                   cy="50%"
                   innerRadius={50}
                   outerRadius={80}
-                  paddingAngle={5}
+                  paddingAngle={4}
                   dataKey="amount"
+                  strokeWidth={0}
                 >
-                  {CARRIER_VS_CFS.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  {CARRIER_VS_CFS.map((entry, i) => (
+                    <Cell key={i} fill={entry.color} />
                   ))}
                 </Pie>
                 <Tooltip
                   formatter={(val: number) => [`₹${val.toLocaleString("en-IN")}`, "Amount"]}
-                  contentStyle={{ backgroundColor: "#1e293b", borderColor: "#334155", color: "#fff", borderRadius: 8, fontSize: 12 }}
+                  contentStyle={{
+                    backgroundColor: "#0f172a",
+                    borderColor: "rgba(255,255,255,0.1)",
+                    color: "#fff",
+                    borderRadius: 10,
+                    fontSize: 12,
+                  }}
                 />
               </PieChart>
             </ResponsiveContainer>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2">
             {CARRIER_VS_CFS.map((item) => (
               <div
                 key={item.name}
-                className="p-3 bg-slate-50 rounded-lg border border-slate-200 flex items-center justify-between text-xs"
+                className="p-3 rounded-lg flex items-center justify-between text-xs transition-colors bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/5"
               >
                 <div className="flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-                  <span className="font-medium text-slate-800">{item.name}</span>
+                  <span
+                    className="w-2.5 h-2.5 rounded-full shrink-0"
+                    style={{ backgroundColor: item.color }}
+                  />
+                  <span className="font-medium text-slate-700 dark:text-slate-300">{item.name}</span>
                 </div>
-                <span className="font-bold font-mono text-slate-900">
+                <span className="font-bold font-mono text-slate-900 dark:text-white">
                   {formatINR(item.amount)}
                 </span>
               </div>

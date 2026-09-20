@@ -87,25 +87,25 @@ export default function TariffsAndSettingsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <div className="text-xs font-semibold text-blue-600 uppercase tracking-wider">
+        <div className="text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider">
           Master Configuration
         </div>
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-          Tariff Engine & CFS Directory
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight mt-0.5">
+          Tariff Engine &amp; CFS Directory
         </h1>
-        <p className="text-xs text-slate-500 mt-0.5">
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
           Deterministic two-clock rate cards, free-time policies, and port-specific CFS directory
         </p>
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-200">
+      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-white/10">
         <button
           onClick={() => setTab("CARRIERS")}
-          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold border-b-2 transition-all ${
+          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold border-b-2 transition-all cursor-pointer ${
             tab === "CARRIERS"
-              ? "border-blue-600 text-blue-600"
-              : "border-transparent text-slate-500 hover:text-slate-800"
+              ? "border-amber-600 dark:border-amber-500 text-amber-800 dark:text-amber-400 font-bold"
+              : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
           }`}
         >
           <Ship className="w-4 h-4" />
@@ -114,10 +114,10 @@ export default function TariffsAndSettingsPage() {
 
         <button
           onClick={() => setTab("CFS")}
-          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold border-b-2 transition-all ${
+          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold border-b-2 transition-all cursor-pointer ${
             tab === "CFS"
-              ? "border-blue-600 text-blue-600"
-              : "border-transparent text-slate-500 hover:text-slate-800"
+              ? "border-amber-600 dark:border-amber-500 text-amber-800 dark:text-amber-400 font-bold"
+              : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
           }`}
         >
           <Building className="w-4 h-4" />
@@ -132,39 +132,39 @@ export default function TariffsAndSettingsPage() {
             {CARRIER_TARIFFS.map((t) => (
               <div
                 key={t.line}
-                className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-4"
+                className="bg-white dark:bg-[#0c1424] rounded-xl border border-slate-200 dark:border-white/5 p-5 shadow-sm dark:shadow-[0_4px_24px_rgba(0,0,0,0.3)] space-y-4"
               >
                 <div>
-                  <span className="text-[10px] uppercase font-bold text-blue-600 block">
+                  <span className="text-[10px] uppercase font-bold text-blue-600 dark:text-amber-400 block">
                     Shipping Line
                   </span>
-                  <h3 className="text-base font-bold text-slate-900">{t.line}</h3>
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white mt-0.5">{t.line}</h3>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 text-xs bg-slate-50 p-3 rounded-lg border border-slate-100">
+                <div className="grid grid-cols-2 gap-2 text-xs bg-slate-50 dark:bg-white/5 p-3 rounded-lg border border-slate-100 dark:border-white/5">
                   <div>
-                    <span className="text-slate-400 block text-[11px]">Standard Free</span>
-                    <strong className="text-slate-800">{t.freeDaysStandard} Days</strong>
+                    <span className="text-slate-500 dark:text-slate-400 block text-[11px]">Standard Free</span>
+                    <strong className="text-slate-900 dark:text-slate-100 font-bold">{t.freeDaysStandard} Days</strong>
                   </div>
                   <div>
-                    <span className="text-slate-400 block text-[11px]">AEO Privilege</span>
-                    <strong className="text-emerald-700">{t.freeDaysAEO} Days</strong>
+                    <span className="text-slate-500 dark:text-slate-400 block text-[11px]">AEO Privilege</span>
+                    <strong className="text-emerald-700 dark:text-emerald-400 font-bold">{t.freeDaysAEO} Days</strong>
                   </div>
                 </div>
 
                 <div className="space-y-2 text-xs">
-                  <div className="text-[11px] font-bold text-slate-500 uppercase">
+                  <div className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase">
                     Escalating Daily Slabs
                   </div>
-                  <div className="flex items-center justify-between p-2 rounded bg-slate-50">
-                    <span className="text-slate-600">{t.slab1.days}</span>
-                    <span className="font-mono font-bold text-rose-600">
+                  <div className="flex items-center justify-between p-2 rounded bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5">
+                    <span className="text-slate-700 dark:text-slate-300">{t.slab1.days}</span>
+                    <span className="font-mono font-bold text-rose-600 dark:text-rose-400">
                       ₹{t.slab1.rateINR.toLocaleString("en-IN")}/day
                     </span>
                   </div>
-                  <div className="flex items-center justify-between p-2 rounded bg-rose-50/50">
-                    <span className="text-slate-600">{t.slab2.days}</span>
-                    <span className="font-mono font-bold text-rose-700">
+                  <div className="flex items-center justify-between p-2 rounded bg-rose-50 dark:bg-rose-950/30 border border-rose-100 dark:border-rose-900/40">
+                    <span className="text-slate-700 dark:text-slate-300">{t.slab2.days}</span>
+                    <span className="font-mono font-bold text-rose-700 dark:text-rose-300">
                       ₹{t.slab2.rateINR.toLocaleString("en-IN")}/day
                     </span>
                   </div>
@@ -182,31 +182,31 @@ export default function TariffsAndSettingsPage() {
             {CFS_ENTITIES.map((cfs) => (
               <div
                 key={cfs.code}
-                className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-4"
+                className="bg-white dark:bg-[#0c1424] rounded-xl border border-slate-200 dark:border-white/5 p-5 shadow-sm dark:shadow-[0_4px_24px_rgba(0,0,0,0.3)] space-y-4"
               >
                 <div>
-                  <div className="flex items-center gap-1.5 text-xs text-slate-500 mb-1">
-                    <MapPin className="w-3.5 h-3.5 text-slate-400" />
+                  <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 mb-1">
+                    <MapPin className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
                     <span>{cfs.port}</span>
                   </div>
-                  <h3 className="text-base font-bold text-slate-900">{cfs.name}</h3>
-                  <span className="text-[10px] font-mono text-slate-400">Code: {cfs.code}</span>
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white">{cfs.name}</h3>
+                  <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500">Code: {cfs.code}</span>
                 </div>
 
-                <div className="space-y-2 text-xs bg-slate-50 p-3 rounded-lg border border-slate-100">
+                <div className="space-y-2 text-xs bg-slate-50 dark:bg-white/5 p-3 rounded-lg border border-slate-100 dark:border-white/5">
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-500">Free Time Upon Gate-In</span>
-                    <strong className="text-slate-800">{cfs.freeDays} Calendar Days</strong>
+                    <span className="text-slate-600 dark:text-slate-400">Free Time Upon Gate-In</span>
+                    <strong className="text-slate-900 dark:text-slate-100 font-bold">{cfs.freeDays} Calendar Days</strong>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-500">Ground Rent Daily Tier</span>
-                    <strong className="font-mono text-rose-600">
+                    <span className="text-slate-600 dark:text-slate-400">Ground Rent Daily Tier</span>
+                    <strong className="font-mono text-rose-600 dark:text-rose-400">
                       ₹{cfs.groundRentDailyINR.toLocaleString("en-IN")}/day
                     </strong>
                   </div>
-                  <div className="flex items-center justify-between pt-1 border-t border-slate-200">
-                    <span className="text-slate-500">Port Shifting Fee (Audit Target)</span>
-                    <strong className="font-mono text-purple-700">
+                  <div className="flex items-center justify-between pt-1 border-t border-slate-200 dark:border-white/10">
+                    <span className="text-slate-600 dark:text-slate-400">Port Shifting Fee (Audit Target)</span>
+                    <strong className="font-mono text-purple-700 dark:text-purple-400">
                       ₹{cfs.shiftingChargeINR.toLocaleString("en-IN")}
                     </strong>
                   </div>

@@ -336,8 +336,8 @@ export default function ContainerSpecsCalculator() {
 
             <div className="mt-4 pt-3 border-t border-[#1e293b] flex items-center justify-between text-xs text-slate-400 font-mono">
               <span>ISO 668 Standard Specification</span>
-              <Link href="/dashboard" className="text-amber-500 hover:text-amber-400 font-semibold inline-flex items-center gap-1">
-                Open Live Core <ArrowRight className="w-3 h-3" />
+              <Link href="/login" className="text-amber-500 hover:text-amber-400 font-semibold inline-flex items-center gap-1">
+                Sign In to Access <ArrowRight className="w-3 h-3" />
               </Link>
             </div>
           </div>

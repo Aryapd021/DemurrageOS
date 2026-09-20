@@ -110,29 +110,29 @@ export default function CsvImportWizardPage() {
     <div className="space-y-6 max-w-5xl">
       {/* Header */}
       <div>
-        <div className="text-xs font-semibold text-blue-600 uppercase tracking-wider">
+        <div className="text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider">
           Data Ingestion Engine
         </div>
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-          CSV Port Discharge & Manifest Wizard
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight mt-0.5">
+          CSV Port Discharge &amp; Manifest Wizard
         </h1>
-        <p className="text-xs text-slate-500 mt-0.5">
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
           In-memory parse, Zod validation, row-level error staging, and atomic commit to PostgreSQL
         </p>
       </div>
 
       {/* Step 1: Upload Dropzone */}
       {step === "UPLOAD" && (
-        <div className="bg-white rounded-2xl border-2 border-dashed border-slate-300 p-10 text-center space-y-5 hover:border-blue-400 transition-colors shadow-sm">
-          <div className="w-16 h-16 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto">
+        <div className="bg-white dark:bg-[#0c1424] rounded-2xl border-2 border-dashed border-slate-300 dark:border-white/10 p-10 text-center space-y-5 hover:border-blue-400 dark:hover:border-amber-500/50 transition-colors shadow-sm dark:shadow-[0_4px_24px_rgba(0,0,0,0.3)]">
+          <div className="w-16 h-16 rounded-2xl bg-blue-50 dark:bg-white/5 text-blue-600 dark:text-amber-400 flex items-center justify-center mx-auto">
             <FileSpreadsheet className="w-8 h-8" />
           </div>
 
           <div className="space-y-1">
-            <h3 className="text-base font-bold text-slate-800">
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">
               Upload Container Manifest or Port Discharge CSV
             </h3>
-            <p className="text-xs text-slate-500 max-w-md mx-auto">
+            <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto">
               Supports standard EDI discharge logs, Port Terminal reports, and custom CHA spreadsheet templates.
             </p>
           </div>
@@ -151,15 +151,15 @@ export default function CsvImportWizardPage() {
 
             <button
               onClick={handleLoadSample}
-              className="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-lg transition-colors border border-slate-200"
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 font-semibold text-xs rounded-lg transition-colors border border-slate-200 dark:border-white/10 cursor-pointer"
             >
-              <Sparkles className="w-4 h-4 text-blue-600" />
+              <Sparkles className="w-4 h-4 text-blue-600 dark:text-amber-400" />
               <span>Load Realistic JNPT / Mundra Sample CSV</span>
             </button>
           </div>
 
-          <div className="pt-4 border-t border-slate-100 text-[11px] text-slate-400">
-            Expected headers: <code className="font-mono text-slate-600">container_number, bl_number, shipping_line, delivery_mode, port_code, discharged_at</code>
+          <div className="pt-4 border-t border-slate-100 dark:border-white/5 text-[11px] text-slate-400 dark:text-slate-500">
+            Expected headers: <code className="font-mono text-slate-600 dark:text-slate-400">container_number, bl_number, shipping_line, delivery_mode, port_code, discharged_at</code>
           </div>
         </div>
       )}
@@ -168,23 +168,23 @@ export default function CsvImportWizardPage() {
       {step === "STAGING" && (
         <div className="space-y-4">
           {/* Summary counters bar */}
-          <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm flex flex-wrap items-center justify-between gap-4">
+          <div className="bg-white dark:bg-[#0c1424] rounded-xl border border-slate-200 dark:border-white/5 p-4 shadow-sm dark:shadow-[0_4px_24px_rgba(0,0,0,0.3)] flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-4 text-xs font-semibold">
-              <span className="text-slate-800 font-bold text-sm">
+              <span className="text-slate-900 dark:text-white font-bold text-sm">
                 Staged Rows: {stagedRows.length}
               </span>
-              <span className="flex items-center gap-1.5 text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+              <span className="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-1 rounded-full border border-emerald-200 dark:border-emerald-900">
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 {validCount} Valid
               </span>
               {warningCount > 0 && (
-                <span className="flex items-center gap-1.5 text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">
+                <span className="flex items-center gap-1.5 text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 px-2.5 py-1 rounded-full border border-amber-200 dark:border-amber-900">
                   <AlertTriangle className="w-3.5 h-3.5" />
                   {warningCount} Warnings
                 </span>
               )}
               {errorCount > 0 && (
-                <span className="flex items-center gap-1.5 text-rose-700 bg-rose-50 px-2.5 py-1 rounded-full border border-rose-200">
+                <span className="flex items-center gap-1.5 text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/60 px-2.5 py-1 rounded-full border border-rose-200 dark:border-rose-900">
                   <XCircle className="w-3.5 h-3.5" />
                   {errorCount} Errors
                 </span>
@@ -194,7 +194,7 @@ export default function CsvImportWizardPage() {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setStep("UPLOAD")}
-                className="px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-100 rounded-lg flex items-center gap-1"
+                className="px-3 py-1.5 text-xs text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg flex items-center gap-1 cursor-pointer"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
                 <span>Reset</span>
@@ -203,7 +203,7 @@ export default function CsvImportWizardPage() {
               <button
                 onClick={handleConfirmInsert}
                 disabled={isInserting || errorCount > 0}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-lg shadow-sm transition-colors disabled:opacity-50"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-lg shadow-sm transition-colors disabled:opacity-50 cursor-pointer"
               >
                 <Check className="w-4 h-4" />
                 <span>
@@ -214,13 +214,13 @@ export default function CsvImportWizardPage() {
           </div>
 
           {/* Staging Data Grid */}
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div className="bg-white dark:bg-[#0c1424] rounded-xl border border-slate-200 dark:border-white/5 shadow-sm dark:shadow-[0_4px_24px_rgba(0,0,0,0.3)] overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                  <tr className="bg-slate-50 dark:bg-white/5 border-b border-slate-200 dark:border-white/5 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                     <th className="py-3 px-3">#</th>
-                    <th className="py-3 px-4">Container & B/L</th>
+                    <th className="py-3 px-4">Container &amp; B/L</th>
                     <th className="py-3 px-4">Client Mapping</th>
                     <th className="py-3 px-4">Shipping Line</th>
                     <th className="py-3 px-4">Mode</th>
@@ -228,35 +228,35 @@ export default function CsvImportWizardPage() {
                     <th className="py-3 px-4">Validation Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-slate-100 dark:divide-white/5">
                   {stagedRows.map((row) => (
-                    <tr key={row.rowNumber} className="hover:bg-slate-50/60">
-                      <td className="py-3 px-3 text-slate-400 font-mono">{row.rowNumber}</td>
+                    <tr key={row.rowNumber} className="hover:bg-slate-50/60 dark:hover:bg-white/5">
+                      <td className="py-3 px-3 text-slate-400 dark:text-slate-500 font-mono">{row.rowNumber}</td>
                       <td className="py-3 px-4 font-mono">
-                        <div className="font-bold text-slate-900">{row.containerNumber}</div>
-                        <div className="text-[11px] text-slate-400">BL: {row.blNumber}</div>
+                        <div className="font-bold text-slate-900 dark:text-white">{row.containerNumber}</div>
+                        <div className="text-[11px] text-slate-500 dark:text-slate-400">BL: {row.blNumber}</div>
                       </td>
-                      <td className="py-3 px-4 font-medium text-slate-700">
+                      <td className="py-3 px-4 font-medium text-slate-700 dark:text-slate-300">
                         {row.clientName}
                       </td>
-                      <td className="py-3 px-4 text-slate-700">{row.shippingLine}</td>
-                      <td className="py-3 px-4 font-semibold text-slate-800">
+                      <td className="py-3 px-4 text-slate-700 dark:text-slate-300">{row.shippingLine}</td>
+                      <td className="py-3 px-4 font-semibold text-slate-800 dark:text-slate-200">
                         {row.deliveryMode}
                       </td>
-                      <td className="py-3 px-4 text-slate-600">{row.portOfDischarge}</td>
+                      <td className="py-3 px-4 text-slate-600 dark:text-slate-400">{row.portOfDischarge}</td>
                       <td className="py-3 px-4">
                         <span
-                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${
                             row.status === "VALID"
-                              ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                              ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-900"
                               : row.status === "WARNING"
-                              ? "bg-amber-50 text-amber-700 border border-amber-200"
-                              : "bg-rose-50 text-rose-700 border border-rose-200"
+                              ? "bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-900"
+                              : "bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-900"
                           }`}
                         >
                           {row.status}
                         </span>
-                        <div className="text-[10px] text-slate-500 mt-1">
+                        <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">
                           {row.validationMessages.join("; ")}
                         </div>
                       </td>
@@ -271,21 +271,21 @@ export default function CsvImportWizardPage() {
 
       {/* Step 3: Success Confirmation */}
       {step === "SUCCESS" && (
-        <div className="bg-white rounded-2xl border border-emerald-200 p-10 text-center space-y-4 shadow-sm">
-          <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto animate-bounce">
+        <div className="bg-white dark:bg-[#0c1424] rounded-2xl border border-emerald-200 dark:border-emerald-900/50 p-10 text-center space-y-4 shadow-sm dark:shadow-[0_4px_24px_rgba(0,0,0,0.3)]">
+          <div className="w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto animate-bounce">
             <CheckCircle2 className="w-8 h-8" />
           </div>
-          <h2 className="text-xl font-bold text-slate-900">
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white">
             Atomic Import Succeeded!
           </h2>
-          <p className="text-xs text-slate-600 max-w-md mx-auto">
+          <p className="text-xs text-slate-600 dark:text-slate-400 max-w-md mx-auto">
             {stagedRows.length} container records and associated port discharge events were inserted into the system of record. Background risk calculation jobs have been queued.
           </p>
 
           <div className="pt-4 flex items-center justify-center gap-3">
             <button
               onClick={() => setStep("UPLOAD")}
-              className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-lg transition-colors"
+              className="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 font-semibold text-xs rounded-lg transition-colors border border-slate-200 dark:border-white/10 cursor-pointer"
             >
               Import Another File
             </button>

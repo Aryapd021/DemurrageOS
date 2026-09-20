@@ -66,7 +66,7 @@ export default function ContainersPage() {
       </div>
 
       {/* Filters bar */}
-      <div className="bg-white dark:bg-[#1e293b] rounded-xl border border-slate-200 dark:border-slate-700 p-4 shadow-sm flex flex-col md:flex-row items-center gap-3 transition-colors">
+      <div className="rounded-xl p-4 flex flex-col md:flex-row items-center gap-3 bg-white dark:bg-[#0c1424] border border-slate-200 dark:border-white/5 shadow-sm dark:shadow-[0_4px_24px_rgba(0,0,0,0.3)]">
         {/* Search */}
         <div className="relative flex-1 w-full">
           <Search className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -75,7 +75,7 @@ export default function ContainersPage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by container number (e.g. MSKU8294102), B/L, or port..."
-            className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg pl-9 pr-4 py-2 text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-mono"
+            className="w-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg pl-9 pr-4 py-2 text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:bg-white dark:focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all font-mono"
           />
         </div>
 
@@ -84,7 +84,7 @@ export default function ContainersPage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-700 dark:text-slate-300 font-medium focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+            className="rounded-lg px-3 py-2 text-xs font-medium focus:outline-none cursor-pointer bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300"
           >
             <option value="ALL">All Risk Statuses</option>
             <option value="CRITICAL">Critical Risk</option>
@@ -92,11 +92,10 @@ export default function ContainersPage() {
             <option value="ON_TRACK">On Track</option>
           </select>
 
-          {/* Mode Filter */}
           <select
             value={modeFilter}
             onChange={(e) => setModeFilter(e.target.value)}
-            className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-700 dark:text-slate-300 font-medium focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+            className="rounded-lg px-3 py-2 text-xs font-medium focus:outline-none cursor-pointer bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300"
           >
             <option value="ALL">All Delivery Modes</option>
             <option value="DPD_DIRECT">DPD Direct</option>
@@ -107,11 +106,11 @@ export default function ContainersPage() {
       </div>
 
       {/* Container Table */}
-      <div className="bg-white dark:bg-[#1e293b] rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden transition-colors">
+      <div className="rounded-xl overflow-hidden bg-white dark:bg-[#0c1424] border border-slate-200 dark:border-white/5 shadow-sm dark:shadow-[0_4px_24px_rgba(0,0,0,0.3)]">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-50/80 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-700 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              <tr className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-white/5 border-b border-slate-200 dark:border-white/5">
                 <th className="py-3.5 px-4">Container &amp; B/L</th>
                 {!isClientScoped && <th className="py-3.5 px-4">Client</th>}
                 <th className="py-3.5 px-4">Delivery Mode</th>
@@ -122,16 +121,25 @@ export default function ContainersPage() {
                 <th className="py-3.5 px-3 text-center">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
+            <tbody className="text-xs divide-y divide-slate-100 dark:divide-white/5">
               {isLoading ? (
                 <tr>
-                  <td colSpan={isClientScoped ? 7 : 8} className="py-12 text-center text-slate-400">
-                    Loading containers from operational core...
+                  <td colSpan={isClientScoped ? 7 : 8} className="p-0">
+                    <div>
+                      {[...Array(6)].map((_, i) => (
+                        <div key={i} className="flex items-center gap-4 px-4 py-3.5 border-b border-slate-100 dark:border-white/5">
+                          <div className="h-4 w-28 animate-pulse rounded bg-slate-200 dark:bg-slate-800" />
+                          <div className="h-4 w-20 animate-pulse rounded bg-slate-200 dark:bg-slate-800" />
+                          <div className="h-4 w-16 animate-pulse rounded bg-slate-200 dark:bg-slate-800" />
+                          <div className="h-4 w-24 ml-auto animate-pulse rounded bg-slate-200 dark:bg-slate-800" />
+                        </div>
+                      ))}
+                    </div>
                   </td>
                 </tr>
               ) : filteredContainers.length === 0 ? (
                 <tr>
-                  <td colSpan={isClientScoped ? 7 : 8} className="py-12 text-center text-slate-400">
+                  <td colSpan={isClientScoped ? 7 : 8} className="py-12 text-center text-slate-500 dark:text-slate-400">
                     No containers found matching criteria.
                   </td>
                 </tr>
@@ -143,21 +151,21 @@ export default function ContainersPage() {
                   return (
                     <tr
                       key={container.id}
-                      className="hover:bg-slate-50/80 dark:hover:bg-slate-800/60 transition-colors group cursor-pointer"
+                      className="transition-colors duration-150 group cursor-pointer hover:bg-slate-50 dark:hover:bg-white/5"
                     >
                       {/* Container & BL */}
                       <td className="py-3.5 px-4">
                         <Link href={`/containers/${container.id}`} className="block">
-                          <div className="font-bold text-blue-600 group-hover:text-blue-700 flex items-center gap-1.5 font-mono text-sm">
+                          <div className="font-bold text-blue-400 group-hover:text-amber-400 flex items-center gap-1.5 font-mono text-sm transition-colors">
                             {container.containerNumber}
                           </div>
-                          <div className="text-[11px] text-slate-400 font-mono mt-0.5">
+                          <div className="text-[11px] text-slate-600 font-mono mt-0.5">
                             B/L: {container.blNumber}
                           </div>
                         </Link>
                       </td>
 
-                      {/* Client Column (Only when viewing "All Clients") */}
+                      {/* Client Column */}
                       {!isClientScoped && (
                         <td className="py-3.5 px-4">
                           <div className="font-semibold text-slate-800 dark:text-slate-200 truncate max-w-[150px]">
@@ -225,10 +233,10 @@ export default function ContainersPage() {
                           <span
                             className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${
                               isCritical
-                                ? "bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-900"
+                                ? "bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-900"
                                 : isWarning
-                                ? "bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-900"
-                                : "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-900"
+                                ? "bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-900"
+                                : "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-900"
                             }`}
                           >
                             {container.risk.level}
@@ -259,7 +267,7 @@ export default function ContainersPage() {
                       <td className="py-3.5 px-3 text-center">
                         <Link
                           href={`/containers/${container.id}`}
-                          className="p-1.5 inline-flex text-slate-400 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-slate-800 rounded transition-colors"
+                          className="p-1.5 inline-flex rounded transition-colors text-slate-400 hover:text-amber-600 dark:text-slate-500 dark:hover:text-amber-400 hover:bg-slate-100 dark:hover:bg-white/5"
                         >
                           <ChevronRight className="w-4 h-4" />
                         </Link>

@@ -45,7 +45,7 @@ const SESSION_COOKIE = "better-auth.session_token";
 const DEMO_COOKIE = "demurrage_demo_session";
 
 export function middleware(req: NextRequest) {
-  const { pathname, searchParams } = req.nextUrl;
+  const { pathname } = req.nextUrl;
 
   // If opening root "/", redirect straight to landing page by default
   if (pathname === "/") {
@@ -54,23 +54,6 @@ export function middleware(req: NextRequest) {
 
   // Always allow public routes and static assets
   if (isPublic(pathname)) return NextResponse.next();
-
-  // If URL has ?demo=true, grant instant demo session cookie and allow access
-  if (searchParams.get("demo") === "true") {
-    const cleanUrl = new URL(pathname, req.url);
-    const response = NextResponse.redirect(cleanUrl);
-    response.cookies.set(SESSION_COOKIE, "demo_active_token", {
-      path: "/",
-      maxAge: 60 * 60 * 24 * 7,
-      sameSite: "lax",
-    });
-    response.cookies.set(DEMO_COOKIE, "true", {
-      path: "/",
-      maxAge: 60 * 60 * 24 * 7,
-      sameSite: "lax",
-    });
-    return response;
-  }
 
   // Check for session cookie
   const sessionCookie =

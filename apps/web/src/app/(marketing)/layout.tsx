@@ -147,22 +147,7 @@ export default function MarketingLayout({
                 background: "rgba(255,255,255,0.03)",
               }}
             >
-              CHA Sign In
-            </Link>
-            <Link
-              href="/dashboard"
-              style={{
-                fontSize: 13,
-                fontWeight: 600,
-                color: "#ffffff",
-                backgroundColor: "#2563eb",
-                padding: "7px 18px",
-                borderRadius: 6,
-                textDecoration: "none",
-                letterSpacing: "-0.01em",
-              }}
-            >
-              Launch Operations
+              Sign In
             </Link>
           </div>
         </div>
@@ -256,10 +241,10 @@ export default function MarketingLayout({
             </Link>
             <span style={{ color: "rgba(255,255,255,0.15)" }}>·</span>
             <Link
-              href="/dashboard?demo=true"
+              href="/register"
               style={{ color: "#f59e0b", textDecoration: "none", fontWeight: 700 }}
             >
-              Open Live Demo →
+              Create Account →
             </Link>
           </div>
 
