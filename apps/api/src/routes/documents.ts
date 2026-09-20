@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
-import { authMiddleware } from '../../middleware/auth';
-import { prisma } from '../../config/database';
-import { sendSuccess, handleErrorResponse } from '../../common/http';
+import { authMiddleware } from '../middleware/auth';
+import { prisma } from '../config/database';
+import { sendSuccess, handleErrorResponse } from '../common/http';
 import { z } from 'zod';
 
 const router = Router();
@@ -17,7 +17,7 @@ router.get('/api/v1/containers/:containerId/documents', authMiddleware, async (r
     });
 
     sendSuccess(res, documents);
-  } catch (error) {
+  } catch (error: unknown) {
     handleErrorResponse(error, res, req.context?.requestId);
   }
 });
@@ -41,7 +41,7 @@ router.post('/api/v1/containers/:containerId/documents', authMiddleware, async (
     });
 
     sendSuccess(res, document, 201);
-  } catch (error) {
+  } catch (error: unknown) {
     handleErrorResponse(error, res, req.context?.requestId);
   }
 });
@@ -57,7 +57,7 @@ router.get('/api/v1/documents/:documentId/extractions', authMiddleware, async (r
     });
 
     sendSuccess(res, extractions);
-  } catch (error) {
+  } catch (error: unknown) {
     handleErrorResponse(error, res, req.context?.requestId);
   }
 });
@@ -87,7 +87,7 @@ router.post('/api/v1/documents/:documentId/extractions/:extractionId/approve', a
     });
 
     sendSuccess(res, extraction);
-  } catch (error) {
+  } catch (error: unknown) {
     handleErrorResponse(error, res, req.context?.requestId);
   }
 });

@@ -1,9 +1,9 @@
 import { Router, Request, Response } from 'express';
-import { authMiddleware } from '../../middleware/auth';
-import { prisma } from '../../config/database';
-import { sendSuccess, handleErrorResponse } from '../../common/http';
-import { RiskEngine, ComplianceSignalService } from '../../services/risk/risk-engine';
-import { NotFoundError } from '../../common/errors';
+import { authMiddleware } from '../middleware/auth';
+import { prisma } from '../config/database';
+import { sendSuccess, handleErrorResponse } from '../common/http';
+import { RiskEngine, ComplianceSignalService } from '../services/risk/risk-engine';
+import { NotFoundError } from '../common/errors';
 
 const router = Router();
 
@@ -24,7 +24,7 @@ router.get('/api/v1/containers/:containerId/risk', authMiddleware, async (req: R
     const risk = await riskEngine.calculateRiskScore(containerId);
 
     sendSuccess(res, risk);
-  } catch (error) {
+  } catch (error: unknown) {
     handleErrorResponse(error, res, req.context?.requestId);
   }
 });
@@ -38,7 +38,7 @@ router.post('/api/v1/containers/:containerId/risk/recalculate', authMiddleware, 
     const risk = await riskEngine.recalculateForContainer(containerId);
 
     sendSuccess(res, risk);
-  } catch (error) {
+  } catch (error: unknown) {
     handleErrorResponse(error, res, req.context?.requestId);
   }
 });
@@ -53,7 +53,7 @@ router.get('/api/v1/containers/:containerId/signals', authMiddleware, async (req
     });
 
     sendSuccess(res, signals);
-  } catch (error) {
+  } catch (error: unknown) {
     handleErrorResponse(error, res, req.context?.requestId);
   }
 });
@@ -71,7 +71,7 @@ router.post('/api/v1/containers/:containerId/signals/derive', authMiddleware, as
     });
 
     sendSuccess(res, signals);
-  } catch (error) {
+  } catch (error: unknown) {
     handleErrorResponse(error, res, req.context?.requestId);
   }
 });

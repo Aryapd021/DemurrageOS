@@ -1,10 +1,10 @@
 import { Router, Request, Response } from 'express';
-import { authMiddleware } from '../../middleware/auth';
-import { prisma } from '../../config/database';
-import { sendSuccess, handleErrorResponse } from '../../common/http';
-import { TaskService } from '../../services/task/task-service';
-import { NotFoundError, ConflictError } from '../../common/errors';
-import { logger } from '../../config/logger';
+import { authMiddleware } from '../middleware/auth';
+import { prisma } from '../config/database';
+import { sendSuccess, handleErrorResponse } from '../common/http';
+import { TaskService } from '../services/task/task-service';
+import { NotFoundError, ConflictError } from '../common/errors';
+import { logger } from '../config/logger';
 
 const router = Router();
 
@@ -27,7 +27,7 @@ router.get('/api/v1/containers/:containerId/tasks', authMiddleware, async (req: 
     });
 
     sendSuccess(res, tasks);
-  } catch (error) {
+  } catch (error: unknown) {
     handleErrorResponse(error, res, req.context?.requestId);
   }
 });
@@ -55,6 +55,10 @@ router.post('/api/v1/tasks/:id/external-assign', authMiddleware, async (req: Req
       description: task.description,
     });
 
+    if (!token) {
+      throw new Error('Failed to generate confirmation token');
+    }
+
     logger.info(
       {
         taskId: updatedTask.id,
@@ -68,7 +72,7 @@ router.post('/api/v1/tasks/:id/external-assign', authMiddleware, async (req: Req
       task: updatedTask,
       confirmationUrl: `${process.env.API_BASE_URL || 'http://localhost:3000'}/api/v1/tasks/confirm/${token}`,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     handleErrorResponse(error, res, req.context?.requestId);
   }
 });
@@ -97,7 +101,7 @@ router.post('/api/v1/tasks/confirm/:token', async (req: Request, res: Response) 
       task,
       message: 'Task confirmed successfully',
     });
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof NotFoundError || error instanceof ConflictError) {
       res.status(error instanceof ConflictError ? 409 : 404).json({
         error: {
@@ -127,7 +131,7 @@ router.get('/api/v1/tasks/:id', authMiddleware, async (req: Request, res: Respon
     }
 
     sendSuccess(res, task);
-  } catch (error) {
+  } catch (error: unknown) {
     handleErrorResponse(error, res, req.context?.requestId);
   }
 });
@@ -148,7 +152,7 @@ router.patch('/api/v1/tasks/:id', authMiddleware, async (req: Request, res: Resp
     });
 
     sendSuccess(res, task);
-  } catch (error) {
+  } catch (error: unknown) {
     handleErrorResponse(error, res, req.context?.requestId);
   }
 });

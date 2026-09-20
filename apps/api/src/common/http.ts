@@ -50,3 +50,41 @@ export function sendPaginated<T>(
 export function sendSuccess<T>(res: Response, data: T, status: number = 200): void {
   res.status(status).json({ data });
 }
+
+export function sendError(
+  res: Response,
+  status: number,
+  code: string,
+  message: string,
+  requestId?: string,
+  fields?: Record<string, string[]>
+): void {
+  res.status(status).json({
+    error: {
+      code,
+      message,
+      requestId,
+      ...(fields && { fields }),
+    },
+  });
+}
+
+export function handleErrorResponse(error: unknown, res: Response, requestId?: string): void {
+  if (error instanceof Error) {
+    res.status(500).json({
+      error: {
+        code: 'INTERNAL_SERVER_ERROR',
+        message: error.message,
+        requestId,
+      },
+    });
+  } else {
+    res.status(500).json({
+      error: {
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'An unexpected error occurred',
+        requestId,
+      },
+    });
+  }
+}

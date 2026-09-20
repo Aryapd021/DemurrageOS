@@ -1,15 +1,15 @@
-import { Redis } from 'redis';
+import { createClient } from 'redis';
 import { env } from './env';
 import { logger } from './logger';
 
-let redis: Redis | null = null;
+let redis: ReturnType<typeof createClient> | null = null;
 
-export async function getRedis(): Promise<Redis> {
+export async function getRedis() {
   if (redis) {
     return redis;
   }
 
-  redis = new Redis({
+  redis = createClient({
     url: env.REDIS_URL,
   });
 
@@ -17,10 +17,11 @@ export async function getRedis(): Promise<Redis> {
     logger.info('Redis connected');
   });
 
-  redis.on('error', (err) => {
+  redis.on('error', (err: Error) => {
     logger.error(err, 'Redis error');
   });
 
+  await redis.connect();
   return redis;
 }
 

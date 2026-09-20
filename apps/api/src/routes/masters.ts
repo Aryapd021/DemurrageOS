@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
-import { authMiddleware } from '../../middleware/auth';
-import { prisma } from '../../config/database';
-import { sendSuccess, handleErrorResponse } from '../../common/http';
+import { authMiddleware } from '../middleware/auth';
+import { prisma } from '../config/database';
+import { sendSuccess, handleErrorResponse } from '../common/http';
 
 const router = Router();
 
@@ -13,7 +13,7 @@ router.get('/api/v1/tariffs', authMiddleware, async (req: Request, res: Response
     });
 
     sendSuccess(res, tariffs);
-  } catch (error) {
+  } catch (error: unknown) {
     handleErrorResponse(error, res, req.context?.requestId);
   }
 });
@@ -50,7 +50,7 @@ router.post('/api/v1/tariffs', authMiddleware, async (req: Request, res: Respons
     });
 
     sendSuccess(res, tariff, 201);
-  } catch (error) {
+  } catch (error: unknown) {
     handleErrorResponse(error, res, req.context?.requestId);
   }
 });
@@ -60,7 +60,7 @@ router.get('/api/v1/ports', authMiddleware, async (req: Request, res: Response) 
   try {
     const ports = await prisma.port.findMany();
     sendSuccess(res, ports);
-  } catch (error) {
+  } catch (error: unknown) {
     handleErrorResponse(error, res, req.context?.requestId);
   }
 });
@@ -78,7 +78,7 @@ router.get('/api/v1/cfs', authMiddleware, async (req: Request, res: Response) =>
     });
 
     sendSuccess(res, cfsList);
-  } catch (error) {
+  } catch (error: unknown) {
     handleErrorResponse(error, res, req.context?.requestId);
   }
 });

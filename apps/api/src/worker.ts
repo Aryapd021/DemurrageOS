@@ -1,5 +1,5 @@
-import { logger } from '../config/logger';
-import { initializeQueues, startWorkers, closeQueues } from './queues';
+import { logger } from './config/logger';
+import { initializeQueues, startWorkers, closeQueues } from './jobs/queues';
 
 async function startWorkerProcess() {
   try {

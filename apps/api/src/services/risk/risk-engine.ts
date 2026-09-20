@@ -31,7 +31,7 @@ export class RiskEngine {
     const reasons: string[] = [];
 
     // 1. Deadline urgency
-    const freeTimeCharges = container.charges.filter((c) => c.chargeType === 'DEMURRAGE');
+    const freeTimeCharges = container.charges.filter((c: any) => c.chargeType === 'DEMURRAGE');
     if (freeTimeCharges.length > 0) {
       const daysOverdue = freeTimeCharges[0].daysOverdue || 0;
       if (daysOverdue > 20) {
@@ -47,7 +47,7 @@ export class RiskEngine {
     }
 
     // 2. Financial exposure
-    const totalExposure = container.charges.reduce((sum, c) => sum + c.amount.toNumber(), 0);
+    const totalExposure = container.charges.reduce((sum: number, c: any) => sum + c.amount.toNumber(), 0);
     if (totalExposure > 50000) {
       baseScore += 25;
       reasons.push(`High financial exposure (${totalExposure})`);
@@ -77,7 +77,7 @@ export class RiskEngine {
     }
 
     // 4. Operational uncertainty
-    const events = container.events.filter((e) => e.eventType === 'DPD_TO_CFS_FALLBACK');
+    const events = container.events.filter((e: any) => e.eventType === 'DPD_TO_CFS_FALLBACK');
     if (events.length > 0) {
       baseScore += 15;
       reasons.push('Delivery mode fallback occurred');
@@ -187,7 +187,7 @@ export class ComplianceSignalService {
       });
 
       if (historicalContainers.length > 0) {
-        const avgValue = historicalContainers.reduce((sum, c) => sum + c.declaredValue!.toNumber(), 0) / historicalContainers.length;
+        const avgValue = historicalContainers.reduce((sum: number, c: any) => sum + c.declaredValue!.toNumber(), 0) / historicalContainers.length;
         const currentValue = container.declaredValue.toNumber();
         const deviation = Math.abs(currentValue - avgValue) / avgValue;
 

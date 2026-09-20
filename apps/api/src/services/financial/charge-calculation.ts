@@ -277,7 +277,7 @@ export class ExposureService {
       where: { containerId },
     });
 
-    const currentExposure = charges.reduce((sum, c) => sum + moneyToNumber(c.amount), 0);
+    const currentExposure = charges.reduce((sum: number, c: any) => sum + moneyToNumber(c.amount), 0);
 
     // Projected exposure is current + potential future charges
     // For now, simplified to current exposure

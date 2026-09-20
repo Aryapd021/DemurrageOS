@@ -1,10 +1,10 @@
 import { Router, Request, Response } from 'express';
-import { authMiddleware } from '../../middleware/auth';
-import { prisma } from '../../config/database';
-import { sendSuccess, handleErrorResponse } from '../../common/http';
+import { authMiddleware } from '../middleware/auth';
+import { prisma } from '../config/database';
+import { sendSuccess, handleErrorResponse } from '../common/http';
 import { z } from 'zod';
-import { ClientRepository } from '../../repositories';
-import { NotFoundError } from '../../common/errors';
+import { ClientRepository } from '../repositories';
+import { NotFoundError } from '../common/errors';
 
 const router = Router();
 
@@ -29,7 +29,7 @@ router.get('/api/v1/clients', authMiddleware, async (req: Request, res: Response
         totalPages: Math.ceil(total / limit),
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     handleErrorResponse(error, res, req.context?.requestId);
   }
 });
@@ -54,7 +54,7 @@ router.post('/api/v1/clients', authMiddleware, async (req: Request, res: Respons
     const client = await clientRepo.create(req.context!.organizationId!, data);
 
     sendSuccess(res, client, 201);
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof z.ZodError) {
       const fields: Record<string, string[]> = {};
       error.errors.forEach((err) => {
@@ -82,7 +82,7 @@ router.get('/api/v1/clients/:id', authMiddleware, async (req: Request, res: Resp
     const clientRepo = new ClientRepository();
     const client = await clientRepo.findById(req.params.id, req.context!.organizationId!);
     sendSuccess(res, client);
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof NotFoundError) {
       res.status(404).json({
         error: {
@@ -114,7 +114,7 @@ router.patch('/api/v1/clients/:id', authMiddleware, async (req: Request, res: Re
     const client = await clientRepo.update(req.params.id, req.context!.organizationId!, data);
 
     sendSuccess(res, client);
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof z.ZodError) {
       const fields: Record<string, string[]> = {};
       error.errors.forEach((err) => {

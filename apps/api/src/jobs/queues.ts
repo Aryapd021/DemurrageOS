@@ -12,12 +12,12 @@ export async function initializeQueues() {
   const redis = await getRedis();
 
   // Create queues
-  const calculateChargesQueue = new Queue('calculate-charges', { connection: redis });
-  const calculateRiskQueue = new Queue('calculate-risk', { connection: redis });
-  const deriveSignalsQueue = new Queue('derive-signals', { connection: redis });
-  const checkAlertsQueue = new Queue('check-alerts', { connection: redis });
-  const processDocumentExtractionQueue = new Queue('process-document-extraction', { connection: redis });
-  const sendNotificationQueue = new Queue('send-notification', { connection: redis });
+  const calculateChargesQueue = new Queue('calculate-charges', { connection: redis as any });
+  const calculateRiskQueue = new Queue('calculate-risk', { connection: redis as any });
+  const deriveSignalsQueue = new Queue('derive-signals', { connection: redis as any });
+  const checkAlertsQueue = new Queue('check-alerts', { connection: redis as any });
+  const processDocumentExtractionQueue = new Queue('process-document-extraction', { connection: redis as any });
+  const sendNotificationQueue = new Queue('send-notification', { connection: redis as any });
 
   queues = {
     'calculate-charges': calculateChargesQueue,
@@ -65,7 +65,7 @@ export async function startWorkers() {
         throw error;
       }
     },
-    { connection: redis }
+    { connection: redis as any }
   );
 
   // Calculate risk worker
@@ -83,7 +83,7 @@ export async function startWorkers() {
         throw error;
       }
     },
-    { connection: redis }
+    { connection: redis as any }
   );
 
   // Derive signals worker
@@ -101,7 +101,7 @@ export async function startWorkers() {
         throw error;
       }
     },
-    { connection: redis }
+    { connection: redis as any }
   );
 
   // Check alerts worker
@@ -124,7 +124,7 @@ export async function startWorkers() {
         const charges = container.charges;
 
         // Check for financial exposure
-        const totalExposure = charges.reduce((sum, c) => sum + c.amount.toNumber(), 0);
+        const totalExposure = charges.reduce((sum: number, c: any) => sum + c.amount.toNumber(), 0);
         if (totalExposure > 50000) {
           await alertService.createOrUpdateAlert(
             job.data.containerId,
@@ -140,7 +140,7 @@ export async function startWorkers() {
         throw error;
       }
     },
-    { connection: redis }
+    { connection: redis as any }
   );
 
   chargesWorker.on('completed', (job) => {

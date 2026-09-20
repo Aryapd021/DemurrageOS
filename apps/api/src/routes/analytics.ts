@@ -1,8 +1,8 @@
 import { Router, Request, Response } from 'express';
-import { authMiddleware } from '../../middleware/auth';
-import { prisma } from '../../config/database';
-import { sendSuccess, handleErrorResponse } from '../../common/http';
-import { ExposureService } from '../../services/financial/charge-calculation';
+import { authMiddleware } from '../middleware/auth';
+import { prisma } from '../config/database';
+import { sendSuccess, handleErrorResponse } from '../common/http';
+import { ExposureService } from '../services/financial/charge-calculation';
 
 const router = Router();
 
@@ -60,7 +60,7 @@ router.get('/api/v1/dashboard', authMiddleware, async (req: Request, res: Respon
     let atRiskContainers = 0;
 
     for (const container of containerList) {
-      const exposure = container.charges.reduce((sum, c) => sum + c.amount.toNumber(), 0);
+      const exposure = container.charges.reduce((sum: number, c: any) => sum + c.amount.toNumber(), 0);
       totalExposure += exposure;
       if (exposure > 0) {
         atRiskContainers++;
@@ -90,7 +90,7 @@ router.get('/api/v1/dashboard', authMiddleware, async (req: Request, res: Respon
       },
       highRiskContainers,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     handleErrorResponse(error, res, req.context?.requestId);
   }
 });
@@ -136,7 +136,7 @@ router.get('/api/v1/clients/:clientId/dashboard', authMiddleware, async (req: Re
       }),
     ]);
 
-    const totalExposure = charges.reduce((sum, c) => sum + c.amount.toNumber(), 0);
+    const totalExposure = charges.reduce((sum: number, c: any) => sum + c.amount.toNumber(), 0);
 
     // Risk distribution
     const riskDistribution = await prisma.container.groupBy({

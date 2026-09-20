@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
-import { authMiddleware } from '../../middleware/auth';
-import { prisma } from '../../config/database';
-import { sendSuccess, handleErrorResponse } from '../../common/http';
+import { authMiddleware } from '../middleware/auth';
+import { prisma } from '../config/database';
+import { sendSuccess, handleErrorResponse } from '../common/http';
 import { z } from 'zod';
 
 const router = Router();
@@ -33,7 +33,7 @@ router.get('/api/v1/imports', authMiddleware, async (req: Request, res: Response
         totalPages: Math.ceil(total / limit),
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     handleErrorResponse(error, res, req.context?.requestId);
   }
 });
@@ -77,7 +77,7 @@ router.post('/api/v1/imports', authMiddleware, async (req: Request, res: Respons
     }
 
     sendSuccess(res, { ...importRecord, rowsCount: rows.length }, 201);
-  } catch (error) {
+  } catch (error: unknown) {
     handleErrorResponse(error, res, req.context?.requestId);
   }
 });
@@ -106,7 +106,7 @@ router.get('/api/v1/imports/:id', authMiddleware, async (req: Request, res: Resp
     }
 
     sendSuccess(res, importRecord);
-  } catch (error) {
+  } catch (error: unknown) {
     handleErrorResponse(error, res, req.context?.requestId);
   }
 });
@@ -215,7 +215,7 @@ router.post('/api/v1/imports/:id/confirm', authMiddleware, async (req: Request, 
         failed: errorCount,
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     handleErrorResponse(error, res, req.context?.requestId);
   }
 });

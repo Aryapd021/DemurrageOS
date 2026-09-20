@@ -1,9 +1,9 @@
 import { Router, Request, Response } from 'express';
-import { authMiddleware } from '../../middleware/auth';
-import { prisma } from '../../config/database';
-import { sendSuccess, handleErrorResponse } from '../../common/http';
-import { ContainerRepository } from '../../repositories';
-import { NotFoundError } from '../../common/errors';
+import { authMiddleware } from '../middleware/auth';
+import { prisma } from '../config/database';
+import { sendSuccess, handleErrorResponse } from '../common/http';
+import { ContainerRepository } from '../repositories';
+import { NotFoundError } from '../common/errors';
 
 const router = Router();
 
@@ -38,7 +38,7 @@ router.get('/api/v1/containers', authMiddleware, async (req: Request, res: Respo
         totalPages: Math.ceil(result.total / limit),
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     handleErrorResponse(error, res, req.context?.requestId);
   }
 });
@@ -82,7 +82,7 @@ router.get('/api/v1/containers/:id', authMiddleware, async (req: Request, res: R
       documents,
       complianceSignals: signals,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof NotFoundError) {
       res.status(404).json({
         error: {
@@ -127,7 +127,7 @@ router.post('/api/v1/containers', authMiddleware, async (req: Request, res: Resp
     });
 
     sendSuccess(res, container, 201);
-  } catch (error) {
+  } catch (error: unknown) {
     handleErrorResponse(error, res, req.context?.requestId);
   }
 });

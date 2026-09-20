@@ -1,5 +1,5 @@
-import { prisma } from '../../config/database';
-import { NotFoundError } from '../../common/errors';
+import { prisma } from '../config/database';
+import { NotFoundError } from '../common/errors';
 
 export class ClientRepository {
   async findById(id: string, organizationId: string) {

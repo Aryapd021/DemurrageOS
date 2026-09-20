@@ -1,11 +1,11 @@
 import { Router, Request, Response } from 'express';
 import { z } from 'zod';
-import { prisma } from '../../config/database';
-import { authMiddleware, organizationScopeMiddleware } from '../../middleware/auth';
-import { requestIdMiddleware, loggerMiddleware, errorHandler } from '../../middleware/request-context';
-import { sendSuccess, sendError, handleErrorResponse } from '../../common/http';
-import { ClientRepository } from '../../repositories';
-import { ValidationError, NotFoundError } from '../../common/errors';
+import { prisma } from '../config/database';
+import { authMiddleware, organizationScopeMiddleware } from '../middleware/auth';
+import { requestIdMiddleware, loggerMiddleware, errorHandler } from '../middleware/request-context';
+import { sendSuccess, sendError, handleErrorResponse } from '../common/http';
+import { ClientRepository } from '../repositories';
+import { ValidationError, NotFoundError } from '../common/errors';
 
 const router = Router();
 
@@ -168,7 +168,7 @@ router.get('/api/v1/clients/:id', authMiddleware, organizationScopeMiddleware, a
     const clientRepo = new ClientRepository();
     const client = await clientRepo.findById(req.params.id, req.context!.organizationId!);
     sendSuccess(res, client);
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof NotFoundError) {
       sendError(res, 404, 'NOT_FOUND', error.message, req.context?.requestId);
       return;
@@ -193,7 +193,7 @@ router.patch('/api/v1/clients/:id', authMiddleware, organizationScopeMiddleware,
     const client = await clientRepo.update(req.params.id, req.context!.organizationId!, data);
 
     sendSuccess(res, client);
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof z.ZodError) {
       const fields: Record<string, string[]> = {};
       error.errors.forEach((err) => {
