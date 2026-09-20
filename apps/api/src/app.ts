@@ -1,9 +1,12 @@
 import express, { Express } from 'express';
+import cookieParser from 'cookie-parser';
+import cors from 'cors';
 import { env } from './config/env';
 import { logger } from './config/logger';
 import { requestIdMiddleware, loggerMiddleware, errorHandler } from './middleware/request-context';
 
 import indexRoutes from './routes/index';
+import authRoutes from './routes/auth';
 import clientRoutes from './routes/clients';
 import containerRoutes from './routes/containers';
 import chargeRoutes from './routes/charges';
@@ -20,20 +23,14 @@ export function createApp(): Express {
 
   // Middleware
   app.use(express.json());
+  app.use(cookieParser());
+  app.use(cors({
+    origin: env.FRONTEND_URL || '*',
+    credentials: true,
+    allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization'],
+  }));
   app.use(requestIdMiddleware);
   app.use(loggerMiddleware);
-
-  // CORS
-  app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS');
-    if (req.method === 'OPTIONS') {
-      res.sendStatus(200);
-    } else {
-      next();
-    }
-  });
 
   // Health checks
   app.get('/health', (req, res) => {
@@ -53,6 +50,7 @@ export function createApp(): Express {
 
   // Routes
   app.use(indexRoutes);
+  app.use(authRoutes);
   app.use(clientRoutes);
   app.use(containerRoutes);
   app.use(chargeRoutes);

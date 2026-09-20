@@ -1,72 +1,48 @@
+import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../config/database';
 import { logger } from '../config/logger';
 
-export async function authMiddleware(req: Request, res: Response, next: NextFunction): Promise<void> {
+export interface AuthenticatedRequest extends Request {
+  user?: {
+    id: string;
+    orgId: string;
+    role: string;
+  };
+}
+
+// New JWT-based authentication middleware
+export async function requireAuth(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+  const token = req.cookies["better-auth.session_token"] || req.headers.authorization?.replace("Bearer ", "");
+
+  if (!token) {
+    res.status(401).json({ message: "Authentication required" });
+    return;
+  }
+
   try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      res.status(401).json({
-        error: {
-          code: 'UNAUTHORIZED',
-          message: 'Missing or invalid authorization header',
-          requestId: req.context?.requestId,
-        },
-      });
-      return;
-    }
+    const payload = jwt.verify(token, process.env.BETTER_AUTH_SECRET!) as any;
+    req.user = {
+      id: payload.userId,
+      orgId: payload.orgId,
+      role: payload.role,
+    };
 
-    const token = authHeader.substring(7);
-
-    // For demo purposes, we'll use a simple token format: "user_id|org_id"
-    // In production, use JWT with proper verification
-    const [userId, organizationId] = token.split('|');
-
-    if (!userId || !organizationId) {
-      res.status(401).json({
-        error: {
-          code: 'INVALID_TOKEN',
-          message: 'Invalid token format',
-          requestId: req.context?.requestId,
-        },
-      });
-      return;
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-    });
-
-    if (!user || user.organizationId !== organizationId) {
-      res.status(401).json({
-        error: {
-          code: 'USER_NOT_FOUND',
-          message: 'User not found or mismatched organization',
-          requestId: req.context?.requestId,
-        },
-      });
-      return;
-    }
-
+    // Also populate req.context for backward compatibility
     if (!req.context) {
       req.context = { requestId: '' };
     }
-
-    req.context.userId = userId;
-    req.context.organizationId = organizationId;
+    req.context.userId = payload.userId;
+    req.context.organizationId = payload.orgId;
 
     next();
-  } catch (error) {
-    logger.error(error, 'Auth middleware error');
-    res.status(500).json({
-      error: {
-        code: 'INTERNAL_ERROR',
-        message: 'Authentication failed',
-        requestId: req.context?.requestId,
-      },
-    });
+  } catch (err) {
+    res.status(401).json({ message: "Invalid or expired session" });
   }
 }
+
+// Backward compatibility alias for existing routes
+export const authMiddleware = requireAuth;
 
 export async function organizationScopeMiddleware(
   req: Request,

@@ -2,11 +2,17 @@ import { z } from 'zod';
 
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
-  PORT: z.string().default('3000'),
+  PORT: z.string().default('8000'),
   DATABASE_URL: z.string(),
   REDIS_URL: z.string(),
   JWT_SECRET: z.string(),
   SESSION_SECRET: z.string(),
+  BETTER_AUTH_SECRET: z.string(),
+  BETTER_AUTH_URL: z.string(),
+  RESEND_API_KEY: z.string(),
+  EMAIL_FROM: z.string().default('onboarding@resend.dev'),
+  INTERNAL_SERVICE_KEY: z.string(),
+  FRONTEND_URL: z.string().default('http://localhost:3005'),
   AI_SERVICE_URL: z.string().optional(),
   STORAGE_TYPE: z.enum(['local', 's3']).default('local'),
   STORAGE_LOCAL_PATH: z.string().default('./uploads'),

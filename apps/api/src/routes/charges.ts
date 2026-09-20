@@ -1,15 +1,15 @@
 import { Router, Request, Response } from 'express';
-import { authMiddleware } from '../../middleware/auth';
-import { prisma } from '../../config/database';
-import { sendSuccess, handleErrorResponse } from '../../common/http';
-import { ChargeCalculationService } from '../../services/financial/charge-calculation';
-import { ExposureService } from '../../services/financial/charge-calculation';
-import { NotFoundError } from '../../common/errors';
+import { authMiddleware, requireAuth } from '../middleware/auth';
+import { prisma } from '../config/database';
+import { sendSuccess, handleErrorResponse } from '../common/http';
+import { ChargeCalculationService } from '../services/financial/charge-calculation';
+import { ExposureService } from '../services/financial/charge-calculation';
+import { NotFoundError } from '../common/errors';
 
 const router = Router();
 
 // Get all charges for a container
-router.get('/api/v1/containers/:containerId/charges', authMiddleware, async (req: Request, res: Response) => {
+router.get('/api/v1/containers/:containerId/charges', requireAuth, async (req: Request, res: Response) => {
   try {
     const { containerId } = req.params;
 
@@ -17,13 +17,15 @@ router.get('/api/v1/containers/:containerId/charges', authMiddleware, async (req
       where: { id: containerId },
     });
 
-    if (!container || container.clientId) {
-      const client = await prisma.client.findUnique({
-        where: { id: container?.clientId },
-      });
-      if (!client || client.organizationId !== req.context!.organizationId!) {
-        throw new NotFoundError('Container not found');
-      }
+    if (!container || !container.clientId) {
+      throw new NotFoundError('Container not found');
+    }
+
+    const client = await prisma.client.findUnique({
+      where: { id: container.clientId },
+    });
+    if (!client || client.organizationId !== req.context!.organizationId!) {
+      throw new NotFoundError('Container not found');
     }
 
     const charges = await prisma.charge.findMany({
@@ -32,7 +34,7 @@ router.get('/api/v1/containers/:containerId/charges', authMiddleware, async (req
     });
 
     sendSuccess(res, charges);
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof NotFoundError) {
       res.status(404).json({
         error: {
@@ -72,7 +74,7 @@ router.post('/api/v1/containers/:containerId/charges/recalculate', authMiddlewar
     const charges = await service.recalculateForContainer(containerId);
 
     sendSuccess(res, { charges });
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof NotFoundError) {
       res.status(404).json({
         error: {
