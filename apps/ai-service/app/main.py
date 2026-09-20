@@ -1,84 +1,98 @@
-from flask import Flask, request, jsonify
-from pydantic import BaseModel
-import logging
-import os
-from datetime import datetime
+from fastapi import FastAPI, HTTPException, status
+from fastapi.middleware.cors import CORSMiddleware
+from app.config import settings
+from app.schemas.request import ExtractionRequest
+from app.schemas.response import ExtractionResponse
+from app.schemas.risk import PredictiveRiskRequest, PredictiveRiskResponse
+from app.schemas.knowledge import KnowledgeQueryRequest, KnowledgeQueryResponse, KnowledgeItem
+from app.extraction.pipeline import run_document_extraction
+from app.risk.advisory_predictor import AdvisoryDeterministicPredictor
+from app.knowledge.chroma_service import ChromaKnowledgeService
 
-app = Flask(__name__)
+app = FastAPI(
+    title=settings.app_name,
+    description="Advisory AI Document Extraction, Advisory Predictor, and Knowledge Intelligence Service for DemurrageOS",
+    version="1.1.0"
+)
 
-# Configure logging
-logging.basicConfig(level=os.getenv('LOG_LEVEL', 'INFO'))
-logger = logging.getLogger(__name__)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
+@app.get("/health", status_code=status.HTTP_200_OK)
+def health_check():
+    return {
+        "status": "ok",
+        "service": "ai-service",
+        "model": settings.extraction_model,
+        "embeddingModel": settings.embedding_model,
+        "hasGeminiKey": bool(settings.gemini_api_key)
+    }
 
-class DocumentExtractionRequest(BaseModel):
-    documentId: str
-    fileUrl: str
-    documentType: str
-
-
-@app.route('/health', methods=['GET'])
-def health():
-    return jsonify({'status': 'ok', 'timestamp': datetime.utcnow().isoformat()})
-
-
-@app.route('/extract', methods=['POST'])
-def extract_document():
-    """
-    Extract fields from a document using AI/ML
-
-    This endpoint receives a document URL and returns:
-    - extracted fields
-    - confidence scores
-    - flag for review if confidence is low
-    - provenance information
-    """
+# Canonical document extraction endpoint
+@app.post("/extract", response_model=ExtractionResponse, status_code=status.HTTP_200_OK)
+def extract_document(payload: ExtractionRequest):
     try:
-        data = request.json
+        response = run_document_extraction(
+            document_id=payload.documentId,
+            file_url=payload.fileUrl,
+            document_type=payload.documentType
+        )
+        return response
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Extraction error: {str(exc)}"
+        )
 
-        if not data or 'documentId' not in data or 'fileUrl' not in data:
-            return jsonify({'error': 'Missing required fields'}), 400
+# Lightweight alias for FILE 1 specification compatibility
+@app.post("/api/ai/extract/document", response_model=ExtractionResponse, status_code=status.HTTP_200_OK)
+def extract_document_alias(payload: ExtractionRequest):
+    """Lightweight alias for canonical /extract endpoint."""
+    return extract_document(payload)
 
-        document_id = data.get('documentId')
-        file_url = data.get('fileUrl')
-        document_type = data.get('documentType', 'UNKNOWN')
+# Advisory deterministic risk evaluation endpoint (FILE 1)
+@app.post("/api/ai/risk/evaluate", response_model=PredictiveRiskResponse, status_code=status.HTTP_200_OK)
+def evaluate_predictive_risk(payload: PredictiveRiskRequest):
+    try:
+        return AdvisoryDeterministicPredictor.evaluate(payload)
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Predictive risk evaluation error: {str(exc)}"
+        )
 
-        logger.info(f'Processing document extraction: {document_id}')
-
-        # Mock extraction - in production, this would use OCR/ML models
-        extracted_fields = {
-            'containerNo': f'CONT{document_id[-8:]}',
-            'billOfLadingNo': f'BL-{document_id[:6]}',
-            'shipper': 'Sample Shipper',
-            'consignee': 'Sample Consignee',
-            'goodsDescription': 'Electronics Equipment',
-            'weight': 15000,
-            'quantity': 100,
-        }
-
-        confidence = 0.85  # Mock confidence score
-
-        result = {
-            'documentId': document_id,
-            'extractedFields': extracted_fields,
-            'confidence': confidence,
-            'flaggedForReview': confidence < 0.75,
-            'provenance': {
-                'model': 'mock-model-v1',
-                'modelVersion': '1.0.0',
-                'promptVersion': '1.0',
-                'extractionSchema': 'v1',
-                'extractedAt': datetime.utcnow().isoformat(),
-            },
-        }
-
-        logger.info(f'Extraction completed for document {document_id}')
-        return jsonify(result), 200
-
-    except Exception as e:
-        logger.error(f'Extraction failed: {str(e)}')
-        return jsonify({'error': str(e)}), 500
-
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=os.getenv('FLASK_ENV') == 'development')
+# Multi-tenant knowledge search endpoint with ChromaDB (FILE 1)
+@app.post("/api/ai/knowledge/query", response_model=KnowledgeQueryResponse, status_code=status.HTTP_200_OK)
+def query_knowledge(payload: KnowledgeQueryRequest):
+    try:
+        results = ChromaKnowledgeService.query(
+            query_text=payload.query,
+            org_id=payload.org_id,
+            n_results=payload.n_results,
+            include_demo=payload.include_demo
+        )
+        items = [
+            KnowledgeItem(
+                id=r["id"],
+                text=r["text"],
+                metadata=r["metadata"],
+                distance=r["distance"]
+            )
+            for r in results
+        ]
+        return KnowledgeQueryResponse(
+            success=True,
+            query=payload.query,
+            org_id=payload.org_id,
+            results=items
+        )
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Knowledge query error: {str(exc)}"
+        )

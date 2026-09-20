@@ -1,107 +1,87 @@
-version: '3.9'
-
 services:
   postgres:
     image: postgres:16-alpine
     container_name: demurrageos-postgres
+    restart: unless-stopped
     environment:
       POSTGRES_USER: demurrage
-      POSTGRES_PASSWORD: password
+      POSTGRES_PASSWORD: demurrage_secret
       POSTGRES_DB: demurrageos
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U demurrage"]
-      interval: 10s
+      test: ["CMD-SHELL", "pg_isready -U demurrage -d demurrageos"]
+      interval: 5s
       timeout: 5s
       retries: 5
 
   redis:
     image: redis:7-alpine
     container_name: demurrageos-redis
+    restart: unless-stopped
     ports:
       - "6379:6379"
+    volumes:
+      - redisdata:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
+      interval: 5s
       timeout: 5s
       retries: 5
-
-  api:
-    build:
-      context: .
-      dockerfile: apps/api/Dockerfile
-    container_name: demurrageos-api
-    environment:
-      NODE_ENV: development
-      DATABASE_URL: postgresql://demurrage:password@postgres:5432/demurrageos
-      REDIS_URL: redis://redis:6379
-      PORT: 3000
-      JWT_SECRET: dev-secret-key
-      SESSION_SECRET: dev-session-secret
-      AI_SERVICE_URL: http://ai-service:5000
-      LOG_LEVEL: info
-    ports:
-      - "3000:3000"
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    volumes:
-      - ./apps/api/src:/app/src
-    command: npm run dev
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  worker:
-    build:
-      context: .
-      dockerfile: apps/api/Dockerfile
-    container_name: demurrageos-worker
-    environment:
-      NODE_ENV: development
-      DATABASE_URL: postgresql://demurrage:password@postgres:5432/demurrageos
-      REDIS_URL: redis://redis:6379
-      LOG_LEVEL: info
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    volumes:
-      - ./apps/api/src:/app/src
-    command: npm run worker
 
   ai-service:
     build:
       context: ./apps/ai-service
       dockerfile: Dockerfile
-    container_name: demurrageos-ai
-    environment:
-      FLASK_ENV: development
-      LOG_LEVEL: INFO
+    container_name: demurrageos-ai-service
+    restart: unless-stopped
     ports:
-      - "5000:5000"
-    volumes:
-      - ./apps/ai-service/app:/app
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - AI_EXTRACTION_MODEL=deepseek-ocr-v1
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  api:
+    build:
+      context: .
+      dockerfile: ./apps/api/Dockerfile
+    container_name: demurrageos-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "4000:4000"
+    environment:
+      DATABASE_URL: "postgresql://demurrage:demurrage_secret@postgres:5432/demurrageos?schema=public"
+      REDIS_URL: "redis://redis:6379"
+      AI_SERVICE_URL: "http://ai-service:8000"
+      PORT: 4000
+      NODE_ENV: production
+      JWT_SECRET: "super-secret-jwt-key-minimum-32-chars-for-hmac-sha256"
 
   web:
     build:
-      context: ./apps/web
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./apps/web/Dockerfile
     container_name: demurrageos-web
-    environment:
-      NEXT_PUBLIC_API_URL: http://localhost:3000
-    ports:
-      - "3001:3000"
+    restart: unless-stopped
     depends_on:
       - api
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: "http://localhost:4000"
 
 volumes:
-  postgres_data:
+  pgdata:
+  redisdata:

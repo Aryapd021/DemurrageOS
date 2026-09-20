@@ -1,91 +1,45 @@
-import express, { Express } from 'express';
-import cookieParser from 'cookie-parser';
+import express from 'express';
 import cors from 'cors';
-import { env } from './config/env';
-import { logger } from './config/logger';
-import { requestIdMiddleware, loggerMiddleware, errorHandler } from './middleware/request-context';
+import { requestIdMiddleware } from './middleware/request-id.middleware.js';
+import { errorMiddleware } from './middleware/error.middleware.js';
+import { containerRouter } from './modules/containers/container.routes.js';
+import { complianceRouter } from './modules/compliance/compliance.routes.js';
+import { riskRouter } from './modules/risk/risk.routes.js';
+import { documentRouter } from './modules/documents/document.routes.js';
+import { taskRouter } from './modules/tasks/task.routes.js';
+import { externalTaskRouter } from './modules/external/external-task.routes.js';
+import { knowledgeRouter } from './modules/knowledge/knowledge.routes.js';
 
-import indexRoutes from './routes/index';
-import authRoutes from './routes/auth';
-import clientRoutes from './routes/clients';
-import containerRoutes from './routes/containers';
-import chargeRoutes from './routes/charges';
-import taskRoutes from './routes/tasks';
-import riskRoutes from './routes/risk';
-import masterRoutes from './routes/masters';
-import alertRoutes from './routes/alerts';
-import importRoutes from './routes/imports';
-import documentRoutes from './routes/documents';
-import analyticsRoutes from './routes/analytics';
-
-export function createApp(): Express {
+export function createApp() {
   const app = express();
 
-  // Middleware
-  app.use(express.json());
-  app.use(cookieParser());
-  app.use(cors({
-    origin: env.FRONTEND_URL || '*',
-    credentials: true,
-    allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization'],
-  }));
+  app.use(cors());
+  app.use(express.json({ limit: '5mb' }));
+  app.use(express.urlencoded({ extended: true }));
   app.use(requestIdMiddleware);
-  app.use(loggerMiddleware);
 
-  // Health checks
-  app.get('/health', (req, res) => {
-    res.json({ status: 'ok', timestamp: new Date().toISOString() });
-  });
-
-  app.get('/ready', async (req, res) => {
-    try {
-      // Check database
-      const { prisma } = await import('./config/database');
-      await prisma.$queryRaw`SELECT 1`;
-      res.json({ status: 'ready' });
-    } catch (error) {
-      res.status(503).json({ status: 'not ready', reason: 'database connection failed' });
-    }
-  });
-
-  // Routes
-  app.use(indexRoutes);
-  app.use(authRoutes);
-  app.use(clientRoutes);
-  app.use(containerRoutes);
-  app.use(chargeRoutes);
-  app.use(taskRoutes);
-  app.use(riskRoutes);
-  app.use(masterRoutes);
-  app.use(alertRoutes);
-  app.use(importRoutes);
-  app.use(documentRoutes);
-  app.use(analyticsRoutes);
-
-  // Error handling
-  app.use(errorHandler);
-
-  return app;
-}
-
-export async function startServer() {
-  const app = createApp();
-  const port = parseInt(env.PORT) || 3000;
-
-  const server = app.listen(port, () => {
-    logger.info({ port }, 'API server started');
-  });
-
-  // Graceful shutdown
-  process.on('SIGTERM', async () => {
-    logger.info('SIGTERM received, shutting down gracefully');
-    server.close(async () => {
-      const { prisma } = await import('./config/database');
-      await prisma.$disconnect();
-      logger.info('Server shut down');
-      process.exit(0);
+  // Healthcheck
+  app.get('/health', (_req, res) => {
+    res.json({
+      status: 'ok',
+      service: 'api',
+      timestamp: new Date().toISOString()
     });
   });
 
-  return server;
+  // Authoritative API routes
+  app.use('/api/v1/containers', containerRouter);
+  app.use('/api/v1/containers', complianceRouter);
+  app.use('/api/v1/containers', riskRouter);
+  app.use('/api/v1/documents', documentRouter);
+  app.use('/api/v1/tasks', taskRouter);
+  app.use('/api/v1/knowledge', knowledgeRouter);
+
+  // External unauthenticated routes (Task confirmation for truckers/contacts)
+  app.use('/api/v1/external', externalTaskRouter);
+
+  // Standardized Error Handler (must be last)
+  app.use(errorMiddleware);
+
+  return app;
 }

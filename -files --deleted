@@ -1,0 +1,158 @@
+warning: in the working copy of '.env.example', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.gitignore', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'README.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'apps/ai-service/Dockerfile', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'apps/ai-service/app/main.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'apps/ai-service/requirements.txt', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'apps/api/Dockerfile', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'apps/api/package.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'apps/api/prisma/schema.prisma', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'apps/api/prisma/seed.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'apps/api/src/app.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'apps/api/src/jobs/queues.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'apps/api/src/server.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'apps/api/tsconfig.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'apps/web/package.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'apps/web/src/app/globals.css', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'apps/web/src/app/layout.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'apps/web/src/app/page.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'apps/web/tailwind.config.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'apps/web/tsconfig.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docker-compose.yml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'package.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'packages/shared-types/package.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'packages/shared-types/src/index.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'packages/shared-types/tsconfig.json', LF will be replaced by CRLF the next time Git touches it
+M	.env.example
+D	.eslintrc.json
+M	.gitignore
+D	.prettierrc
+D	01-frontend-implementation-plan-EXPRESS.md
+D	02-backend-implementation-plan-EXPRESS.md
+D	03-data-infrastructure-platform-plan-EXPRESS.md
+D	04-ai-differentiation-layer-plan-EXPRESS.md
+D	ANSH-FRONTEND-TASKS.md
+D	ARYA-BACKEND-TASKS.md
+D	COMPLETION_REPORT.md
+D	DHYAN-DATA-AND-INFRA-TASKS.md
+D	DemurrageOS-ARCHITECTURE-AND-FLOW.md
+D	DemurrageOS-MASTER-PLAN.md
+D	HARI-AI-ENGINE-TASKS.md
+D	IMPLEMENTATION_SUMMARY.md
+M	README.md
+D	RUNNING.md
+D	STRUCTURE.md
+D	TEAM-ROLES-AND-API-KEYS-GUIDE.md
+M	apps/ai-service/Dockerfile
+M	apps/ai-service/app/main.py
+M	apps/ai-service/requirements.txt
+D	apps/api/.eslintrc.json
+M	apps/api/Dockerfile
+M	apps/api/package.json
+M	apps/api/prisma/schema.prisma
+M	apps/api/prisma/seed.ts
+M	apps/api/src/app.ts
+D	apps/api/src/bcryptjs.d.ts
+D	apps/api/src/common/errors.ts
+D	apps/api/src/common/http.ts
+D	apps/api/src/common/money.ts
+D	apps/api/src/config/database.ts
+D	apps/api/src/config/env.ts
+D	apps/api/src/config/logger.ts
+D	apps/api/src/config/redis.ts
+M	apps/api/src/jobs/queues.ts
+D	apps/api/src/middleware/auth.ts
+D	apps/api/src/middleware/request-context.ts
+D	apps/api/src/repositories/index.ts
+D	apps/api/src/routes/alerts.ts
+D	apps/api/src/routes/analytics.ts
+D	apps/api/src/routes/auth.ts
+D	apps/api/src/routes/charges.ts
+D	apps/api/src/routes/clients.ts
+D	apps/api/src/routes/containers.ts
+D	apps/api/src/routes/documents.ts
+D	apps/api/src/routes/imports.ts
+D	apps/api/src/routes/index.ts
+D	apps/api/src/routes/masters.ts
+D	apps/api/src/routes/risk.ts
+D	apps/api/src/routes/tasks.ts
+M	apps/api/src/server.ts
+D	apps/api/src/services/alert/alert-service.ts
+D	apps/api/src/services/auth/auth-service.ts
+D	apps/api/src/services/financial/charge-calculation.ts
+D	apps/api/src/services/risk/risk-engine.ts
+D	apps/api/src/services/task/task-service.ts
+D	apps/api/src/worker.ts
+D	apps/api/tests/api.test.ts
+D	apps/api/tests/financial.test.ts
+M	apps/api/tsconfig.json
+D	apps/api/vitest.config.ts
+M	apps/web/package.json
+D	apps/web/public/images/aerial-ship-truck-split.jpg
+D	apps/web/public/images/bankar-cargo-network.jpg
+D	apps/web/public/images/cargo-express-iso.jpg
+D	apps/web/public/images/condor-leasing-ui.jpg
+D	apps/web/public/images/container-hoist-sling-white.jpg
+D	apps/web/public/images/container-risk-overboard.jpg
+D	apps/web/public/images/container-stack-dark-orange.jpg
+D	apps/web/public/images/crane-hoist-one-container.jpg
+D	apps/web/public/images/customs-inspector-gantry.jpg
+D	apps/web/public/images/gantry-sky-dramatic.jpg
+D	apps/web/public/images/hero-container-crane.jpg
+D	apps/web/public/images/msc-yellow-containers-stack.jpg
+D	apps/web/public/images/port-multimodal-tiltshift.jpg
+D	apps/web/public/images/unitmove-crane-hero.jpg
+D	apps/web/public/images/ural-export-modular.jpg
+D	apps/web/public/videos/hero-cinematic.mp4
+D	apps/web/public/videos/landing-bg.mp4
+D	apps/web/src/app/(app)/alerts/page.tsx
+D	apps/web/src/app/(app)/analytics/page.tsx
+D	apps/web/src/app/(app)/clients/[clientId]/page.tsx
+D	apps/web/src/app/(app)/clients/page.tsx
+D	apps/web/src/app/(app)/containers/[containerId]/documents/page.tsx
+D	apps/web/src/app/(app)/containers/[containerId]/page.tsx
+D	apps/web/src/app/(app)/containers/page.tsx
+D	apps/web/src/app/(app)/dashboard/page.tsx
+D	apps/web/src/app/(app)/imports/new/page.tsx
+D	apps/web/src/app/(app)/layout.tsx
+D	apps/web/src/app/(app)/settings/tariffs/page.tsx
+D	apps/web/src/app/(app)/tasks/[taskId]/page.tsx
+D	apps/web/src/app/(app)/tasks/page.tsx
+D	apps/web/src/app/(auth)/forgot-password/page.tsx
+D	apps/web/src/app/(auth)/layout.tsx
+D	apps/web/src/app/(auth)/login/page.tsx
+D	apps/web/src/app/(auth)/register/page.tsx
+D	apps/web/src/app/(auth)/reset-password/page.tsx
+D	apps/web/src/app/(auth)/verify-email/page.tsx
+D	apps/web/src/app/(marketing)/landing/page.tsx
+D	apps/web/src/app/(marketing)/layout.tsx
+D	apps/web/src/app/(marketing)/privacy/page.tsx
+D	apps/web/src/app/(marketing)/terms/page.tsx
+D	apps/web/src/app/confirm/[token]/page.tsx
+M	apps/web/src/app/globals.css
+M	apps/web/src/app/layout.tsx
+M	apps/web/src/app/page.tsx
+D	apps/web/src/components/containers/delivery-mode-badge.tsx
+D	apps/web/src/components/containers/event-timeline.tsx
+D	apps/web/src/components/containers/risk-explainability-panel.tsx
+D	apps/web/src/components/containers/two-clock-card.tsx
+D	apps/web/src/components/layout/client-switcher.tsx
+D	apps/web/src/components/layout/header.tsx
+D	apps/web/src/components/layout/sidebar.tsx
+D	apps/web/src/components/marketing/bento-grid.tsx
+D	apps/web/src/components/marketing/container-specs-calculator.tsx
+D	apps/web/src/components/marketing/full-page-video-background.tsx
+D	apps/web/src/components/marketing/hero-section.tsx
+D	apps/web/src/components/marketing/interactive-motion-background.tsx
+D	apps/web/src/components/marketing/journey-timeline.tsx
+D	apps/web/src/components/marketing/ports-section.tsx
+D	apps/web/src/components/marketing/two-clock-preview.tsx
+D	apps/web/src/components/providers.tsx
+D	apps/web/src/components/ui/animated-counter.tsx
+D	apps/web/src/components/ui/skeleton.tsx
+D	apps/web/src/lib/api/client.ts
+D	apps/web/src/lib/api/mock-data.ts
+D	apps/web/src/lib/auth/auth-client.ts
+D	apps/web/src/lib/hooks/use-containers.ts
+D	apps/web/src/lib/hooks/use-documents.ts
+D	apps/web/src/lib/hook

@@ -1,378 +1,263 @@
-#!/usr/bin/env node
-
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Role, DeliveryMode, ContainerStatus, ChargeType, TaskType, AssigneeType, DocumentType, ExtractionStatus, ReviewStatus, ComplianceSignalType, SignalSource } from '@prisma/client';
+import crypto from 'crypto';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('Seeding database...');
+  console.log('--- Seeding DemurrageOS Database ---');
 
-  // Delete all data
-  await prisma.outboxEvent.deleteMany();
-  await prisma.auditLog.deleteMany();
-  await prisma.notification.deleteMany();
-  await prisma.task.deleteMany();
-  await prisma.documentExtraction.deleteMany();
-  await prisma.document.deleteMany();
-  await prisma.importRow.deleteMany();
-  await prisma.import.deleteMany();
-  await prisma.alert.deleteMany();
-  await prisma.complianceSignal.deleteMany();
-  await prisma.charge.deleteMany();
-  await prisma.containerEvent.deleteMany();
-  await prisma.container.deleteMany();
-  await prisma.shipment.deleteMany();
-  await prisma.client.deleteMany();
-  await prisma.session.deleteMany();
-  await prisma.user.deleteMany();
-  await prisma.organization.deleteMany();
-  await prisma.carrier.deleteMany();
-  await prisma.customs.deleteMany();
-  await prisma.cfs.deleteMany();
-  await prisma.port.deleteMany();
-  await prisma.tariff.deleteMany();
-
-  console.log('Creating organizations...');
-  const org = await prisma.organization.create({
-    data: {
-      name: 'Demo CHA Logistics',
-      type: 'CHA',
-    },
+  // 1. Organization
+  const org = await prisma.organization.upsert({
+    where: { id: '00000000-0000-0000-0000-000000000001' },
+    update: {},
+    create: {
+      id: '00000000-0000-0000-0000-000000000001',
+      name: 'Apex Global Logistics & CHA Services'
+    }
   });
 
-  console.log('Creating users...');
-  const admin = await prisma.user.create({
-    data: {
+  // 2. Users
+  const chaUser = await prisma.user.upsert({
+    where: { email: 'cha@apexlogistics.com' },
+    update: {},
+    create: {
+      id: '00000000-0000-0000-0000-000000000002',
       organizationId: org.id,
-      email: 'admin@demurrageos.local',
-      name: 'Admin User',
-      role: 'ADMIN',
-    },
+      email: 'cha@apexlogistics.com',
+      name: 'Vikram Mehta (Lead CHA)',
+      role: Role.CHA
+    }
   });
 
-  const operations = await prisma.user.create({
-    data: {
+  // 3. CFS Terminals
+  const cfs1 = await prisma.cFS.upsert({
+    where: {
+      organizationId_code: {
+        organizationId: org.id,
+        code: 'NS-CFS-01'
+      }
+    },
+    update: {},
+    create: {
+      id: '00000000-0000-0000-0000-000000000003',
       organizationId: org.id,
-      email: 'ops@demurrageos.local',
-      name: 'Operations User',
-      role: 'OPERATIONS',
-    },
+      name: 'Nhava Sheva Gateway CFS',
+      code: 'NS-CFS-01',
+      location: 'JNPT, Navi Mumbai',
+      groundRentFreeDays: 3
+    }
   });
 
-  const finance = await prisma.user.create({
-    data: {
+  // 4. Clients
+  // Client A: Dual-accredited AEO + ACP
+  const clientTata = await prisma.client.upsert({
+    where: { id: '11111111-1111-1111-1111-111111111111' },
+    update: {},
+    create: {
+      id: '11111111-1111-1111-1111-111111111111',
       organizationId: org.id,
-      email: 'finance@demurrageos.local',
-      name: 'Finance User',
-      role: 'FINANCE',
-    },
+      name: 'Tata Electronics Private Limited',
+      iecCode: '0388019283',
+      gstin: '27AAACT2819M1Z8',
+      aeoStatus: true,
+      acpStatus: true,
+      contactName: 'Anand Kulkarni',
+      contactEmail: 'anand.k@tataelectronics.com',
+      contactPhone: '+91 9820123456'
+    }
   });
 
-  console.log('Creating clients...');
-  const clients = await Promise.all([
-    prisma.client.create({
+  // Client B: AEO accredited only
+  const clientReliance = await prisma.client.upsert({
+    where: { id: '22222222-2222-2222-2222-222222222222' },
+    update: {},
+    create: {
+      id: '22222222-2222-2222-2222-222222222222',
+      organizationId: org.id,
+      name: 'Reliance Retail Ventures',
+      iecCode: '0399182736',
+      gstin: '27AAACR1234F1Z2',
+      aeoStatus: true,
+      acpStatus: false,
+      contactName: 'Pooja Shah',
+      contactEmail: 'pooja.s@relianceretail.com'
+    }
+  });
+
+  // Client C: Unaccredited
+  const clientPinnacle = await prisma.client.upsert({
+    where: { id: '33333333-3333-3333-3333-333333333333' },
+    update: {},
+    create: {
+      id: '33333333-3333-3333-3333-333333333333',
+      organizationId: org.id,
+      name: 'Pinnacle Auto Parts LLP',
+      iecCode: '0377481920',
+      gstin: '27AAACP9988P1Z5',
+      aeoStatus: false,
+      acpStatus: false,
+      contactName: 'Rohit Sharma',
+      contactEmail: 'rohit@pinnacleauto.in'
+    }
+  });
+
+  // 5. Tariffs (Carrier Demurrage & CFS Ground Rent)
+  await prisma.tariff.deleteMany({ where: { organizationId: org.id } });
+
+  await prisma.tariff.createMany({
+    data: [
+      // Carrier Demurrage
+      { organizationId: org.id, carrier: 'MAERSK', chargeType: ChargeType.DEMURRAGE, slabDaysStart: 1, slabDaysEnd: 3, ratePerDay20: 0, ratePerDay40: 0, currency: 'INR' },
+      { organizationId: org.id, carrier: 'MAERSK', chargeType: ChargeType.DEMURRAGE, slabDaysStart: 4, slabDaysEnd: 7, ratePerDay20: 2500, ratePerDay40: 5000, currency: 'INR' },
+      { organizationId: org.id, carrier: 'MAERSK', chargeType: ChargeType.DEMURRAGE, slabDaysStart: 8, slabDaysEnd: 999, ratePerDay20: 5000, ratePerDay40: 10000, currency: 'INR' },
+      // CFS Ground Rent
+      { organizationId: org.id, cfsId: cfs1.id, chargeType: ChargeType.CFS_GROUND_RENT, slabDaysStart: 1, slabDaysEnd: 3, ratePerDay20: 0, ratePerDay40: 0, currency: 'INR' },
+      { organizationId: org.id, cfsId: cfs1.id, chargeType: ChargeType.CFS_GROUND_RENT, slabDaysStart: 4, slabDaysEnd: 10, ratePerDay20: 1200, ratePerDay40: 2400, currency: 'INR' },
+      { organizationId: org.id, cfsId: cfs1.id, chargeType: ChargeType.CFS_GROUND_RENT, slabDaysStart: 11, slabDaysEnd: 999, ratePerDay20: 2500, ratePerDay40: 5000, currency: 'INR' }
+    ]
+  });
+
+  // 6. Historical Data for Tata Electronics (HS 8471.30)
+  const pastDates = [10, 25, 45, 75, 110];
+  for (let i = 0; i < pastDates.length; i++) {
+    const d = new Date();
+    d.setDate(d.getDate() - pastDates[i]);
+    await prisma.container.create({
       data: {
         organizationId: org.id,
-        name: 'Acme Imports Ltd',
-        iecCode: 'IEC001234567',
-        gstin: '18AABCT1234H1Z0',
-        contactName: 'John Smith',
-        contactEmail: 'john@acmeimports.com',
-        aeoStatus: 'CERTIFIED',
-        acpStatus: 'CERTIFIED',
-      },
-    }),
-    prisma.client.create({
-      data: {
-        organizationId: org.id,
-        name: 'Global Trade Corp',
-        iecCode: 'IEC007654321',
-        gstin: '18AABCU1234H1Z0',
-        contactName: 'Jane Doe',
-        contactEmail: 'jane@globaltrade.com',
-        aeoStatus: 'CERTIFIED',
-      },
-    }),
-    prisma.client.create({
-      data: {
-        organizationId: org.id,
-        name: 'TechWorld Distributors',
-        iecCode: 'IEC009876543',
-        contactName: 'Bob Wilson',
-        contactEmail: 'bob@techworld.com',
-      },
-    }),
-  ]);
+        clientId: clientTata.id,
+        containerNumber: `MSCU${1000000 + i}`,
+        carrier: 'MAERSK',
+        hsCode: '8471.30',
+        declaredValue: 4500000 + (i * 50000),
+        currency: 'INR',
+        dischargeDate: d,
+        status: ContainerStatus.DELIVERED,
+        deliveryMode: DeliveryMode.DPD_CFS,
+        createdAt: d
+      }
+    });
+  }
 
-  console.log('Creating ports and CFS...');
-  const portKochi = await prisma.port.create({
-    data: {
-      code: 'INCKC',
-      name: 'Port of Kochi',
-      country: 'India',
-    },
-  });
-
-  const portChennai = await prisma.port.create({
-    data: {
-      code: 'INMAA2',
-      name: 'Port of Chennai',
-      country: 'India',
-    },
-  });
-
-  const cfsKochi = await prisma.cfs.create({
-    data: {
-      portId: portKochi.id,
-      name: 'Kochi Container Freight Station',
-      address: 'Cochin Port, Kochi',
-      contactPhone: '+91-484-2381234',
-    },
-  });
-
-  const cfsChennai = await prisma.cfs.create({
-    data: {
-      portId: portChennai.id,
-      name: 'Chennai Container Freight Station',
-      address: 'Chennai Port, Chennai',
-      contactPhone: '+91-44-2516789',
-    },
-  });
-
-  console.log('Creating carriers...');
-  const carriers = await Promise.all([
-    prisma.carrier.create({
-      data: {
-        code: 'MSC',
-        name: 'Mediterranean Shipping Company',
-      },
-    }),
-    prisma.carrier.create({
-      data: {
-        code: 'MAEU',
-        name: 'Maersk Line',
-      },
-    }),
-    prisma.carrier.create({
-      data: {
-        code: 'CMA',
-        name: 'CMA CGM',
-      },
-    }),
-  ]);
-
-  console.log('Creating tariffs...');
+  // 7. Active At-Risk Container (CSQU3054383)
   const now = new Date();
-  const tariffCurrent = await prisma.tariff.create({
-    data: {
-      code: 'TARIFF_2025_Q1',
-      name: 'Standard Tariff Q1 2025',
-      version: 1,
-      effectiveFrom: new Date('2025-01-01'),
-      effectiveTo: new Date('2025-03-31'),
-      demurrageRate: 500,
-      detentionRate: 300,
-      storageRate: 200,
-      groundRentRate: 1000,
-      freeDays: 5,
+  const dischargeDate = new Date(now.getTime() - 4 * 24 * 60 * 60 * 1000); // Discharged 4 days ago
+  const freeTimeExpiresAt = new Date(now.getTime() + 14 * 60 * 60 * 1000); // 14 hours remaining!
+
+  const atRiskContainer = await prisma.container.upsert({
+    where: { id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa' },
+    update: {},
+    create: {
+      id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+      organizationId: org.id,
+      clientId: clientTata.id,
+      containerNumber: 'CSQU3054383',
+      containerType: 'DRY',
+      size: 40,
+      status: ContainerStatus.DISCHARGED,
+      deliveryMode: DeliveryMode.DPD_CFS,
+      carrier: 'MAERSK',
+      cfsId: cfs1.id,
+      billOfLading: 'MEDU192837465',
+      declaredValue: 4650000,
       currency: 'INR',
-    },
+      hsCode: '8471.30',
+      dischargeDate,
+      freeTimeExpiresAt
+    }
   });
 
-  console.log('Creating shipments...');
-  const shipments = [];
-  for (let i = 0; i < 20; i++) {
-    const shipment = await prisma.shipment.create({
-      data: {
-        clientId: clients[i % clients.length].id,
-        referenceNo: `SHP-2025-${String(i + 1).padStart(5, '0')}`,
-        poNo: `PO-${String(i + 1).padStart(4, '0')}`,
-        invoiceNo: `INV-${String(i + 1).padStart(4, '0')}`,
+  // 8. Add Container Events
+  await prisma.containerEvent.createMany({
+    data: [
+      {
+        containerId: atRiskContainer.id,
+        eventType: 'VESSEL_DISCHARGE',
+        location: 'JNPT Port Terminal',
+        source: 'TERMINAL_EDI',
+        timestamp: dischargeDate
       },
-    });
-    shipments.push(shipment);
-  }
+      {
+        containerId: atRiskContainer.id,
+        eventType: 'CUSTOMS_ASSESSMENT_COMPLETED',
+        location: 'Customs Air/Sea Cargo Complex',
+        source: 'ICEGATE',
+        timestamp: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000)
+      }
+    ]
+  });
 
-  console.log('Creating containers and events...');
-  for (let i = 0; i < 100; i++) {
-    const shipment = shipments[i % shipments.length];
-    const carrier = carriers[i % carriers.length];
-    const cfs = i % 2 === 0 ? cfsKochi : cfsChennai;
-    const deliveryMode = i % 10 === 0 ? 'DPD_DIRECT' : i % 10 === 1 ? 'DPD_CFS' : 'CFS';
-
-    const dischargeDate = new Date(now.getTime() - Math.random() * 30 * 24 * 60 * 60 * 1000);
-
-    const container = await prisma.container.create({
-      data: {
-        clientId: shipment.clientId,
-        shipmentId: shipment.id,
-        containerNo: `CONT${String(i + 1).padStart(8, '0')}`,
-        containerType: i % 3 === 0 ? '40FT' : i % 3 === 1 ? '40HC' : '20FT',
-        deliveryMode,
-        carrierId: carrier.id,
-        cfsId: deliveryMode !== 'DPD_DIRECT' ? cfs.id : null,
-        dischargeDate,
-        dischargePort: cfs.port.code,
-        hsCode: `${8400 + (i % 100).toString().padStart(3, '0')}`,
-        goodsDescription: ['Electronics', 'Textiles', 'Machinery', 'Chemicals'][i % 4],
-        quantity: Math.floor(Math.random() * 100) + 10,
-        uom: 'NOS',
-        declaredValue: Math.floor(Math.random() * 100000) + 10000,
-        currency: 'USD',
+  // 9. Compliance Signals for At-Risk Container
+  await prisma.complianceSignal.createMany({
+    data: [
+      {
+        containerId: atRiskContainer.id,
+        signalType: ComplianceSignalType.AEO_ACP_STATUS,
+        score: 100,
+        source: SignalSource.DERIVED,
+        reason: 'Client is dual-accredited (AEO Certified & ACP Program enrolled)'
       },
-    });
+      {
+        containerId: atRiskContainer.id,
+        signalType: ComplianceSignalType.HS_CODE_NOVELTY,
+        score: 95,
+        source: SignalSource.DERIVED,
+        reason: 'Frequent routine filings for HS code 8471.30 (5 historical shipments)'
+      },
+      {
+        containerId: atRiskContainer.id,
+        signalType: ComplianceSignalType.VALUATION_CONSISTENCY,
+        score: 95,
+        source: SignalSource.DERIVED,
+        reason: 'Declared value (₹4,650,000) is consistent with historical baseline'
+      },
+      {
+        containerId: atRiskContainer.id,
+        signalType: ComplianceSignalType.DOC_COMPLETENESS,
+        score: 33,
+        source: SignalSource.DERIVED,
+        reason: 'Documentation incomplete: missing Delivery Order and Bill of Entry'
+      }
+    ]
+  });
 
-    // Create events based on delivery mode
-    if (deliveryMode === 'DPD_DIRECT') {
-      await prisma.containerEvent.create({
-        data: {
-          containerId: container.id,
-          eventType: 'DISCHARGE',
-          source: 'SYSTEM',
-          eventTimestamp: dischargeDate,
-        },
-      });
-    } else if (deliveryMode === 'DPD_CFS') {
-      // Fallback scenario
-      const fallbackDay = Math.floor(Math.random() * 5) + 1;
-      const fallbackDate = new Date(dischargeDate.getTime() + fallbackDay * 24 * 60 * 60 * 1000);
+  // 10. External Task with 72-Hour Token
+  const rawToken = '7f8a9b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a';
+  const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
 
-      await prisma.containerEvent.create({
-        data: {
-          containerId: container.id,
-          eventType: 'DISCHARGE',
-          source: 'SYSTEM',
-          eventTimestamp: dischargeDate,
-        },
-      });
-
-      await prisma.containerEvent.create({
-        data: {
-          containerId: container.id,
-          eventType: 'DPD_TO_CFS_FALLBACK',
-          source: 'SYSTEM',
-          eventTimestamp: fallbackDate,
-        },
-      });
-
-      // CFS gate-in after fallback
-      const cfsGateInDate = new Date(fallbackDate.getTime() + Math.random() * 5 * 24 * 60 * 60 * 1000);
-      await prisma.containerEvent.create({
-        data: {
-          containerId: container.id,
-          eventType: 'CFS_GATE_IN',
-          source: 'SYSTEM',
-          eventTimestamp: cfsGateInDate,
-        },
-      });
-    } else {
-      // Direct CFS
-      await prisma.containerEvent.create({
-        data: {
-          containerId: container.id,
-          eventType: 'CFS_GATE_IN',
-          source: 'SYSTEM',
-          eventTimestamp: new Date(dischargeDate.getTime() + 2 * 24 * 60 * 60 * 1000),
-        },
-      });
+  await prisma.task.create({
+    data: {
+      id: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
+      organizationId: org.id,
+      containerId: atRiskContainer.id,
+      title: 'Authorize and Schedule Container Pickup with Transporter',
+      description: 'Free time expires in 14 hours. Transporter must confirm truck dispatch.',
+      taskType: TaskType.PICKUP,
+      assigneeType: AssigneeType.EXTERNAL_CONTACT,
+      externalContactName: 'Ramesh Kumar (Highway Freightways)',
+      externalContactPhone: '+91 9876543210',
+      externalContactEmail: 'ramesh.trucking@example.com',
+      pickupLocation: 'Nhava Sheva Gateway CFS, Gate 2',
+      scheduledDate: new Date(now.getTime() + 8 * 60 * 60 * 1000),
+      confirmationTokenHash: tokenHash,
+      tokenExpiresAt: new Date(now.getTime() + 72 * 60 * 60 * 1000)
     }
+  });
 
-    // Create some charges
-    if (i % 2 === 0) {
-      await prisma.charge.create({
-        data: {
-          containerId: container.id,
-          tariffId: tariffCurrent.id,
-          chargeType: 'DEMURRAGE',
-          amount: Math.floor(Math.random() * 10000) + 1000,
-          currency: 'INR',
-          freeDaysRemaining: Math.max(0, Math.floor(Math.random() * 5) - 3),
-          daysOverdue: Math.max(0, Math.floor(Math.random() * 20)),
-          calculationVersion: '1.0.0',
-          tariffVersion: tariffCurrent.version,
-          appliedTariffEffectiveFrom: tariffCurrent.effectiveFrom,
-        },
-      });
-    }
-
-    // Create alerts for some containers
-    if (i % 4 === 0) {
-      const alertTypes = ['DEADLINE_URGENCY', 'FINANCIAL_EXPOSURE', 'OPERATIONAL_UNCERTAINTY'];
-      await prisma.alert.create({
-        data: {
-          containerId: container.id,
-          alertType: alertTypes[i % alertTypes.length],
-          severity: ['LOW', 'MEDIUM', 'HIGH'][i % 3],
-          message: `Alert for container ${container.containerNo}`,
-        },
-      });
-    }
-
-    // Create compliance signals
-    if (i % 3 === 0) {
-      const signalTypes = ['DOC_COMPLETENESS', 'HS_CODE_NOVELTY', 'VALUATION_CONSISTENCY'];
-      await prisma.complianceSignal.create({
-        data: {
-          containerId: container.id,
-          signalType: signalTypes[i % signalTypes.length],
-          score: Math.random() * 100,
-          source: i % 2 === 0 ? 'MANUAL' : 'DERIVED',
-        },
-      });
-    }
-
-    // Create tasks for some containers
-    if (i % 10 === 0) {
-      await prisma.task.create({
-        data: {
-          containerId: container.id,
-          assigneeType: 'INTERNAL_USER',
-          assigneeId: operations.id,
-          title: `Arrange pickup for ${container.containerNo}`,
-          description: 'Coordinate with transport provider',
-          status: 'PENDING',
-          priority: 'HIGH',
-          dueDate: new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000),
-        },
-      });
-    }
-
-    // Create external tasks for some containers
-    if (i % 15 === 0) {
-      const token = Math.random().toString(36).substring(2, 15);
-      const tokenHash = Buffer.from(token).toString('hex');
-
-      await prisma.task.create({
-        data: {
-          containerId: container.id,
-          assigneeType: 'EXTERNAL_CONTACT',
-          externalName: 'Transport Provider',
-          externalEmail: `trucker${i}@example.com`,
-          externalPhone: '+91-9876543210',
-          title: `Arrange delivery for ${container.containerNo}`,
-          status: 'PENDING',
-          priority: 'MEDIUM',
-          dueDate: new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000),
-          confirmationTokenHash: tokenHash,
-          confirmationTokenExpiresAt: new Date(now.getTime() + 72 * 60 * 60 * 1000),
-        },
-      });
-    }
-  }
-
-  console.log('Creating audit log entries...');
-  await prisma.auditLog.create({
+  // 11. Initial Alert
+  await prisma.alert.create({
     data: {
       organizationId: org.id,
-      userId: admin.id,
-      action: 'SEED_DATA',
-      entityType: 'Organization',
-      entityId: org.id,
-      afterState: JSON.stringify({ seeded: true }),
-    },
+      containerId: atRiskContainer.id,
+      severity: 'HIGH',
+      title: 'Elevated Demurrage Risk: CSQU3054383',
+      message: 'Free time expires in 14 hours. Missing Delivery Order verification.'
+    }
   });
 
-  console.log('Seed completed successfully!');
+  console.log('--- Seeding completed successfully! ---');
+  console.log(`Demo container ID: ${atRiskContainer.id} (CSQU3054383)`);
+  console.log(`Demo external token: ${rawToken}`);
 }
 
 main()

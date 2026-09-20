@@ -1,0 +1,177 @@
+warning: in the working copy of '.env.example', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.gitignore', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'README.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'apps/ai-service/Dockerfile', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'apps/ai-service/app/main.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'apps/ai-service/requirements.txt', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'apps/api/Dockerfile', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'apps/api/package.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'apps/api/prisma/schema.prisma', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'apps/api/prisma/seed.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'apps/api/src/app.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'apps/api/src/jobs/queues.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'apps/api/src/server.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'apps/api/tsconfig.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'apps/web/package.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'apps/web/src/app/globals.css', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'apps/web/src/app/layout.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'apps/web/src/app/page.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'apps/web/tailwind.config.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'apps/web/tsconfig.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docker-compose.yml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'package.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'packages/shared-types/package.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'packages/shared-types/src/index.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'packages/shared-types/tsconfig.json', LF will be replaced by CRLF the next time Git touches it
+ .env.example                                       |   59 [32m+[m[31m-[m
+ .eslintrc.json                                     |   19 [31m-[m
+ .gitignore                                         |   48 [32m+[m[31m-[m
+ .prettierrc                                        |    9 [31m-[m
+ 01-frontend-implementation-plan-EXPRESS.md         |   95 [31m-[m
+ 02-backend-implementation-plan-EXPRESS.md          |  261 [31m-[m
+ 03-data-infrastructure-platform-plan-EXPRESS.md    |  111 [31m-[m
+ 04-ai-differentiation-layer-plan-EXPRESS.md        |  113 [31m-[m
+ ANSH-FRONTEND-TASKS.md                             |   68 [31m-[m
+ ARYA-BACKEND-TASKS.md                              |  198 [31m-[m
+ COMPLETION_REPORT.md                               |  564 [31m--[m
+ DHYAN-DATA-AND-INFRA-TASKS.md                      |  232 [31m-[m
+ DemurrageOS-ARCHITECTURE-AND-FLOW.md               | 1309 [31m-----[m
+ DemurrageOS-MASTER-PLAN.md                         | 1765 [31m-------[m
+ HARI-AI-ENGINE-TASKS.md                            |  152 [31m-[m
+ IMPLEMENTATION_SUMMARY.md                          |  709 [31m---[m
+ README.md                                          | 1016 [32m++[m[31m--[m
+ RUNNING.md                                         |  332 [31m--[m
+ STRUCTURE.md                                       |   95 [31m-[m
+ TEAM-ROLES-AND-API-KEYS-GUIDE.md                   |   78 [31m-[m
+ apps/ai-service/Dockerfile                         |   16 [32m+[m[31m-[m
+ apps/ai-service/app/main.py                        |  180 [32m+[m[31m-[m
+ apps/ai-service/requirements.txt                   |   11 [32m+[m[31m-[m
+ apps/api/.eslintrc.json                            |    6 [31m-[m
+ apps/api/Dockerfile                                |   39 [32m+[m[31m-[m
+ apps/api/package.json                              |   66 [32m+[m[31m-[m
+ apps/api/prisma/schema.prisma                      |  856 [32m++[m[31m-[m
+ apps/api/prisma/seed.ts                            |  559 [32m+[m[31m-[m
+ apps/api/src/app.ts                                |  112 [32m+[m[31m-[m
+ apps/api/src/bcryptjs.d.ts                         |    9 [31m-[m
+ apps/api/src/common/errors.ts                      |   81 [31m-[m
+ apps/api/src/common/http.ts                        |   52 [31m-[m
+ apps/api/src/common/money.ts                       |   52 [31m-[m
+ apps/api/src/config/database.ts                    |   13 [31m-[m
+ apps/api/src/config/env.ts                         |   43 [31m-[m
+ apps/api/src/config/logger.ts                      |   16 [31m-[m
+ apps/api/src/config/redis.ts                       |   32 [31m-[m
+ apps/api/src/jobs/queues.ts                        |  207 [32m+[m[31m-[m
+ apps/api/src/middleware/auth.ts                    |  118 [31m-[m
+ apps/api/src/middleware/request-context.ts         |   91 [31m-[m
+ apps/api/src/repositories/index.ts                 |  392 [31m--[m
+ apps/api/src/routes/alerts.ts                      |  135 [31m-[m
+ apps/api/src/routes/analytics.ts                   |  163 [31m-[m
+ apps/api/src/routes/auth.ts                        |  381 [31m--[m
+ apps/api/src/routes/charges.ts                     |  144 [31m-[m
+ apps/api/src/routes/clients.ts                     |  223 [31m-[m
+ apps/api/src/routes/containers.ts                  |  135 [31m-[m
+ apps/api/src/routes/documents.ts                   |   95 [31m-[m
+ apps/api/src/routes/imports.ts                     |  223 [31m-[m
+ apps/api/src/routes/index.ts                       |  221 [31m-[m
+ apps/api/src/routes/masters.ts                     |   86 [31m-[m
+ apps/api/src/routes/risk.ts                        |   79 [31m-[m
+ apps/api/src/routes/tasks.ts                       |  156 [31m-[m
+ apps/api/src/server.ts                             |   16 [32m+[m[31m-[m
+ apps/api/src/services/alert/alert-service.ts       |   75 [31m-[m
+ apps/api/src/services/auth/auth-service.ts         |   76 [31m-[m
+ .../src/services/financial/charge-calculation.ts   |  316 [31m--[m
+ apps/api/src/services/risk/risk-engine.ts          |  230 [31m-[m
+ apps/api/src/services/task/task-service.ts         |  158 [31m-[m
+ apps/api/src/worker.ts                             |   25 [31m-[m
+ apps/api/tests/api.test.ts                         |  131 [31m-[m
+ apps/api/tests/financial.test.ts                   |  143 [31m-[m
+ apps/api/tsconfig.json                             |    6 [32m+[m[31m-[m
+ apps/api/vitest.config.ts                          |   18 [31m-[m
+ apps/web/package.json                              |   34 [32m+[m[31m-[m
+ apps/web/public/images/aerial-ship-truck-split.jpg |  Bin [31m134759[m -> [32m0[m bytes
+ apps/web/public/images/bankar-cargo-network.jpg    |  Bin [31m59654[m -> [32m0[m bytes
+ apps/web/public/images/cargo-express-iso.jpg       |  Bin [31m62879[m -> [32m0[m bytes
+ apps/web/public/images/condor-leasing-ui.jpg       |  Bin [31m100299[m -> [32m0[m bytes
+ .../public/images/container-hoist-sling-white.jpg  |  Bin [31m43748[m -> [32m0[m bytes
+ .../web/public/images/container-risk-overboard.jpg |  Bin [31m117920[m -> [32m0[m bytes
+ .../public/images/container-stack-dark-orange.jpg  |  Bin [31m79909[m -> [32m0[m bytes
+ .../public/images/crane-hoist-one-container.jpg    |  Bin [31m151017[m -> [32m0[m bytes
+ .../web/public/images/customs-inspector-gantry.jpg |  Bin [31m163478[m -> [32m0[m bytes
+ apps/web/public/images/gantry-sky-dramatic.jpg     |  Bin [31m136935[m -> [32m0[m bytes
+ apps/web/public/images/hero-container-crane.jpg    |  Bin [31m132582[m -> [32m0[m bytes
+ .../public/images/msc-yellow-containers-stack.jpg  |  Bin [31m138018[m -> [32m0[m bytes
+ .../public/images/port-multimodal-tiltshift.jpg    |  Bin [31m169686[m -> [32m0[m bytes
+ apps/web/public/images/unitmove-crane-hero.jpg     |  Bin [31m57732[m -> [32m0[m bytes
+ apps/web/public/images/ural-export-modular.jpg     |  Bin [31m83298[m -> [32m0[m bytes
+ apps/web/public/videos/hero-cinematic.mp4          |  Bin [31m276166[m -> [32m0[m bytes
+ apps/web/public/videos/landing-bg.mp4              |  Bin [31m1143864[m -> [32m0[m bytes
+ apps/web/src/app/(app)/alerts/page.tsx             |  118 [31m-[m
+ apps/web/src/app/(app)/analytics/page.tsx          |  225 [31m-[m
+ apps/web/src/app/(app)/clients/[clientId]/page.tsx |  159 [31m-[m
+ apps/web/src/app/(app)/clients/page.tsx            |  149 [31m-[m
+ .../containers/[containerId]/documents/page.tsx    |  306 [31m--[m
+ .../app/(app)/containers/[containerId]/page.tsx    |  282 [31m-[m
+ apps/web/src/app/(app)/containers/page.tsx         |  285 [31m-[m
+ apps/web/src/app/(app)/dashboard/page.tsx          |  534 [31m--[m
+ apps/web/src/app/(app)/imports/new/page.tsx        |  304 [31m--[m
+ apps/web/src/app/(app)/layout.tsx                  |   23 [31m-[m
+ apps/web/src/app/(app)/settings/tariffs/page.tsx   |  221 [31m-[m
+ apps/web/src/app/(app)/tasks/[taskId]/page.tsx     |  309 [31m--[m
+ apps/web/src/app/(app)/tasks/page.tsx              |  190 [31m-[m
+ apps/web/src/app/(auth)/forgot-password/page.tsx   |   59 [31m-[m
+ apps/web/src/app/(auth)/layout.tsx                 |  143 [31m-[m
+ apps/web/src/app/(auth)/login/page.tsx             |  187 [31m-[m
+ apps/web/src/app/(auth)/register/page.tsx          |  624 [31m---[m
+ apps/web/src/app/(auth)/reset-password/page.tsx    |   83 [31m-[m
+ apps/web/src/app/(auth)/verify-email/page.tsx      |   65 [31m-[m
+ apps/web/src/app/(marketing)/landing/page.tsx      |   20 [31m-[m
+ apps/web/src/app/(marketing)/layout.tsx            |  277 [31m-[m
+ apps/web/src/app/(marketing)/privacy/page.tsx      |   66 [31m-[m
+ apps/web/src/app/(marketing)/terms/page.tsx        |   60 [31m-[m
+ apps/web/src/app/confirm/[token]/page.tsx          |  235 [31m-[m
+ apps/web/src/app/globals.css                       |   90 [32m+[m[31m-[m
+ apps/web/src/app/layout.tsx                        |   50 [32m+[m[31m-[m
+ apps/web/src/app/page.tsx                          |  177 [32m+[m[31m-[m
+ .../components/containers/delivery-mode-badge.tsx  |   83 [31m-[m
+ .../src/components/containers/event-timeline.tsx   |  122 [31m-[m
+ .../containers/risk-explainability-panel.tsx       |  151 [31m-[m
+ .../src/components/containers/two-clock-card.tsx   |  151 [31m-[m
+ apps/web/src/components/layout/client-switcher.tsx |  169 [31m-[m
+ apps/web/src/components/layout/header.tsx          |  178 [31m-[m
+ apps/web/src/components/layout/sidebar.tsx         |  206 [31m-[m
+ apps/web/src/components/marketing/bento-grid.tsx   |  211 [31m-[m
+ .../marketing/container-specs-calculator.tsx       |  450 [31m--[m
+ .../marketing/full-page-video-background.tsx       |   36 [31m-[m
+ apps/web/src/components/marketing/hero-section.tsx |  193 [31m-[m
+ .../marketing/interactive-motion-background.tsx    |  255 [31m-[m
+ .../src/components/marketing/journey-timeline.tsx  |  350 [31m--[m
+ .../web/src/components/marketing/ports-section.tsx |  327 [31m--[m
+ .../src/components/marketing/two-clock-preview.tsx |  153 [31m-[m
+ apps/web/src/components/providers.tsx              |   32 [31m-[m
+ apps/web/src/components/ui/animated-counter.tsx    |   57 [31m-[m
+ apps/web/src/components/ui/skeleton.tsx            |   65 [31m-[m
+ apps/web/src/lib/api/client.ts                     |  222 [31m-[m
+ apps/web/src/lib/api/mock-data.ts                  |  829 [31m---[m
+ apps/web/src/lib/auth/auth-client.ts               |  146 [31m-[m
+ apps/web/src/lib/hooks/use-containers.ts           |   29 [31m-[m
+ apps/web/src/lib/hooks/use-documents.ts            |   31 [31m-[m
+ apps/web/src/lib/hooks/use-metrics.ts              |   10 [31m-[m
+ apps/web/src/lib/hooks/use-tasks.ts                |   55 [31m-[m
+ apps/web/src/lib/stores/auth-context.tsx           |   83 [31m-[m
+ apps/web/src/lib/stores/client-scope-context.tsx   |   61 [31m-[m
+ apps/web/src/lib/stores/theme-context.tsx          |   68 [31m-[m
+ apps/web/src/lib/utils.ts                          |   35 [31m-[m
+ apps/web/src/middleware.ts                         |   82 [31m-[m
+ apps/web/tailwind.config.ts                        |   50 [32m+[m[31m-[m
+ apps/web/tsconfig.json                             |    3 [32m+[m[31m-[m
+ docker-compose.yml                                 |  102 [32m+[m[31m-[m
+ git-steps.pdf                                      |  Bin [31m332888[m -> [32m0[m bytes
+ package.json                                       |   41 [32m+[m[31m-[m
+ packages/shared-types/package.json                 |   15 [32m+[m[31m-[m
+ packages/shared-types/src/index.ts                 |  243 [32m+[m[31m-[m
+ packages/shared-types/tsconfig.json                |   12 [32m+[m[31m-[m
+ pnpm-lock.yaml                                     | 5433 [31m--------------------[m
+ pnpm-workspace.yaml                                |   10 [31m-[m
+ tsconfig.json                                      |   25 [31m-[m
+ turbo.json                                         |   31 [31m-[m
+ 151 files changed, 1714 insertions(+), 27785 deletions(-)

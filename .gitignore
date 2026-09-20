@@ -1,24 +1,38 @@
+# Dependencies
 node_modules/
+
+# Build output
 dist/
 build/
-.env
-.env.local
-.env.*.local
-*.log
-.DS_Store
-.turbo/
 .next/
-out/
-coverage/
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-.pytest_cache/
+
+# Logs
+*.log
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Python
 __pycache__/
+*.py[cod]
+.venv/
 venv/
-*.egg-info/
-.mypy_cache/
-.ruff_cache/
+
+# ChromaDB runtime data
+chroma_db/
+apps/ai-service/chroma_db/
+
+# TypeScript build cache
 *.tsbuildinfo
+
+# Test coverage
+coverage/
+
+# Local uploads
+uploads/
+
+# Local databases
+dev.db
+dev.db-journal
