@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "DemurrageOS - Container demurrage and logistics management platform",
   "private": true,
+  "packageManager": "pnpm@11.15.0",
   "engines": {
     "node": ">=20.0.0"
   },

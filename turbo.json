@@ -5,7 +5,7 @@
     "**/.env.local",
     "**/tsconfig.json"
   ],
-  "pipeline": {
+  "tasks": {
     "typecheck": {
       "outputs": []
     },
@@ -20,7 +20,7 @@
       "persistent": true
     },
     "build": {
-      "outputs": ["dist"],
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"],
       "dependsOn": ["^build"]
     },
     "dev": {
