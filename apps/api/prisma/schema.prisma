@@ -1,0 +1,311 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum UserRole {
+  OWNER
+  ADMIN
+  OPERATOR
+  VIEWER
+}
+
+enum DeliveryMode {
+  DPD_DIRECT
+  DPD_CFS
+  CFS
+}
+
+enum ContainerStatus {
+  IN_TRANSIT
+  DISCHARGED
+  CUSTOMS_CLEARED
+  CFS_STORED
+  OUT_FOR_DELIVERY
+  DELIVERED
+  EMPTY_RETURNED
+}
+
+enum ContainerHealth {
+  ON_TRACK
+  WARNING
+  CRITICAL
+  RESOLVED
+}
+
+enum EventType {
+  VESSEL_ARRIVED
+  DISCHARGE
+  CUSTOMS_OUT_OF_CHARGE
+  DELIVERY_ORDER_ISSUED
+  GATE_OUT_PORT
+  CFS_GATE_IN
+  CFS_GATE_OUT
+  DPD_TO_CFS_FALLBACK
+  DELIVERY_ORDER_REISSUED
+  CONTAINER_RETURNED
+}
+
+enum ChargeType {
+  DEMURRAGE
+  DETENTION
+  STORAGE
+  GROUND_RENT
+  SHIFTING_CHARGE
+}
+
+enum ComplianceSignalType {
+  DOC_COMPLETENESS
+  HS_CODE_NOVELTY
+  AEO_ACP_STATUS
+  VALUATION_CONSISTENCY
+}
+
+enum TaskStatus {
+  PENDING
+  ASSIGNED
+  CONFIRMED
+  COMPLETED
+  EXPIRED
+  CANCELLED
+}
+
+enum TaskType {
+  CUSTOMS_FILING
+  DUTY_PAYMENT
+  DELIVERY_ORDER_COLLECTION
+  TRUCKER_PICKUP
+  CFS_GATE_PASS
+  EMPTY_RETURN
+}
+
+model Organization {
+  id               String      @id @default(uuid())
+  name             String
+  chaLicenseNumber String      @unique
+  clients          Client[]
+  users            User[]
+  invites          Invite[]
+  containers       Container[]
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  @@map("organizations")
+}
+
+model User {
+  id             String       @id @default(uuid())
+  organizationId String
+  email          String       @unique
+  name           String
+  passwordHash   String?
+  role           UserRole     @default(OPERATOR)
+  emailVerified  Boolean      @default(false)
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@map("users")
+}
+
+model Invite {
+  id             String       @id @default(uuid())
+  email          String
+  organizationId String
+  role           UserRole     @default(OPERATOR)
+  token          String       @unique
+  expiresAt      DateTime
+  createdAt      DateTime     @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@map("invites")
+}
+
+model Client {
+  id                  String       @id @default(uuid())
+  organizationId      String
+  name                String
+  iecCode             String
+  contactEmail        String?
+  isAeoAcp            Boolean      @default(false)
+  defaultDeliveryMode DeliveryMode @default(CFS)
+  organization        Organization @relation(fields: [organizationId], references: [id])
+  containers          Container[]
+  shipments           Shipment[]
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  @@unique([organizationId, iecCode])
+  @@map("clients")
+}
+
+model Shipment {
+  id              String      @id @default(uuid())
+  clientId        String
+  blNumber        String      @unique
+  vesselName      String
+  voyageNumber    String
+  portOfLoading   String
+  portOfDischarge String
+  eta             DateTime
+  client          Client      @relation(fields: [clientId], references: [id])
+  containers      Container[]
+  createdAt       DateTime    @default(now())
+
+  @@map("shipments")
+}
+
+model Container {
+  id                     String          @id @default(uuid())
+  organizationId         String
+  clientId               String
+  shipmentId             String?
+  containerNumber        String          @unique
+  sizeType               String          @default("40HC") // 20GP, 40GP, 40HC, 45HC
+  carrierName            String
+  portOfDischarge        String
+  cfsName                String?
+  deliveryMode           DeliveryMode    @default(CFS)
+  status                 ContainerStatus @default(DISCHARGED)
+  healthStatus           ContainerHealth @default(ON_TRACK)
+  dischargedAt           DateTime?
+  cfsGateInAt            DateTime?
+  freeDaysGrantedCarrier Int             @default(5)
+  freeDaysGrantedCfs     Int             @default(3)
+
+  organization      Organization       @relation(fields: [organizationId], references: [id])
+  client            Client             @relation(fields: [clientId], references: [id])
+  shipment          Shipment?          @relation(fields: [shipmentId], references: [id])
+  events            ContainerEvent[]
+  charges           Charge[]
+  complianceSignals ComplianceSignal[]
+  tasks             Task[]
+  documents         Document[]
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  @@index([organizationId, clientId])
+  @@index([containerNumber])
+  @@map("containers")
+}
+
+model ContainerEvent {
+  id             String    @id @default(uuid())
+  containerId    String
+  eventType      EventType
+  eventTimestamp DateTime
+  location       String
+  source         String
+  metadata       Json?
+  container      Container @relation(fields: [containerId], references: [id])
+  createdAt      DateTime  @default(now())
+
+  @@index([containerId, eventTimestamp])
+  @@map("container_events")
+}
+
+model Tariff {
+  id            String     @id @default(uuid())
+  carrierName   String?
+  cfsName       String?
+  chargeType    ChargeType
+  containerSize String     @default("40")
+  dayFrom       Int
+  dayTo         Int? // NULL means indefinitely
+  ratePerDay    Float
+  currency      String     @default("INR")
+  effectiveFrom DateTime
+  effectiveTo   DateTime?
+
+  @@map("tariffs")
+}
+
+model Charge {
+  id           String     @id @default(uuid())
+  containerId  String
+  chargeType   ChargeType
+  daysOverdue  Int
+  rateApplied  Float
+  amount       Float
+  currency     String     @default("INR")
+  calculatedAt DateTime   @default(now())
+  container    Container  @relation(fields: [containerId], references: [id])
+
+  @@map("charges")
+}
+
+model ComplianceSignal {
+  id          String               @id @default(uuid())
+  containerId String
+  signalType  ComplianceSignalType
+  status      String // PASS, WARNING, FAIL
+  scoreImpact Int
+  details     String
+  evaluatedAt DateTime             @default(now())
+  container   Container            @relation(fields: [containerId], references: [id])
+
+  @@map("compliance_signals")
+}
+
+model Task {
+  id                    String     @id @default(uuid())
+  containerId           String
+  taskType              TaskType
+  title                 String
+  status                TaskStatus @default(PENDING)
+  assigneeType          String // INTERNAL, EXTERNAL_TRUCKER, EXTERNAL_CUSTOMS_BROKER
+  assigneeName          String
+  assigneeContact       String?
+  confirmationTokenHash String?    @unique
+  tokenExpiresAt        DateTime?
+  confirmedAt           DateTime?
+  container             Container  @relation(fields: [containerId], references: [id])
+  createdAt             DateTime   @default(now())
+  updatedAt             DateTime   @updatedAt
+
+  @@map("tasks")
+}
+
+model Document {
+  id               String            @id @default(uuid())
+  containerId      String
+  documentType     String // BILL_OF_LADING, SHIPPING_BILL, DELIVERY_ORDER, INVOICE
+  fileName         String
+  fileUrl          String
+  stagedExtraction StagedExtraction?
+  container        Container         @relation(fields: [containerId], references: [id])
+  createdAt        DateTime          @default(now())
+
+  @@map("documents")
+}
+
+model StagedExtraction {
+  id              String   @id @default(uuid())
+  documentId      String   @unique
+  extractedFields Json
+  confidenceScore Float
+  humanConfirmed  Boolean  @default(false)
+  document        Document @relation(fields: [documentId], references: [id])
+  createdAt       DateTime @default(now())
+
+  @@map("staged_extractions")
+}
+
+model AuditLog {
+  id             String   @id @default(uuid())
+  organizationId String
+  action         String
+  entityType     String
+  entityId       String
+  actor          String
+  payload        Json?
+  timestamp      DateTime @default(now())
+
+  @@map("audit_logs")
+}

@@ -1,0 +1,29 @@
+{
+  "name": "demurrageos-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "DemurrageOS — Operational Control System for Container Movement and Financial Exposure",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "dev:api": "npm run dev --workspace=apps/api",
+    "dev:web": "npm run dev --workspace=apps/web",
+    "seed": "npm run seed --workspace=apps/api",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present"
+  },
+  "keywords": [
+    "demurrage",
+    "logistics",
+    "customs",
+    "cha",
+    "dpd",
+    "cfs",
+    "shipping"
+  ],
+  "author": "DemurrageOS Team",
+  "license": "ISC"
+}
