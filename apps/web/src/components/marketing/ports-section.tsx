@@ -295,7 +295,7 @@ export default function PortsSection() {
                   Launch Authorized Portal →
                 </Link>
                 <Link
-                  href="/dashboard?demo=true"
+                  href="/register"
                   style={{
                     display: "inline-block",
                     border: "1px solid rgba(255,255,255,0.12)",
@@ -308,7 +308,7 @@ export default function PortsSection() {
                     background: "rgba(255,255,255,0.03)",
                   }}
                 >
-                  Explore Live Demo
+                  Create Broker Account
                 </Link>
               </div>
               <p style={{ fontSize: 12, color: "rgba(226,232,240,0.35)", marginTop: 24, marginBottom: 0 }}>

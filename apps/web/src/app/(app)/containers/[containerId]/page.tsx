@@ -4,47 +4,41 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useContainer, useTriggerDpdFallback } from "@/lib/hooks/use-containers";
+import { formatINR, formatDate } from "@/lib/utils";
 import { DeliveryModeBadge } from "@/components/containers/delivery-mode-badge";
 import { TwoClockCard } from "@/components/containers/two-clock-card";
-import { RiskExplainabilityPanel } from "@/components/containers/risk-explainability-panel";
 import { EventTimeline } from "@/components/containers/event-timeline";
-import { formatINR, formatDate } from "@/lib/utils";
-import { 
-  ArrowLeft, 
-  FileText, 
-  CheckSquare, 
-  ArrowRightLeft, 
-  Ship, 
-  MapPin, 
-  Receipt, 
-  ShieldAlert, 
-  Calendar, 
-  Download,
-  AlertOctagon,
-  Sparkles
+import { RiskExplainabilityPanel } from "@/components/containers/risk-explainability-panel";
+import {
+  ArrowLeft,
+  FileText,
+  ArrowRightLeft,
+  Receipt,
+  CheckSquare,
+  AlertTriangle,
 } from "lucide-react";
 
 export default function ContainerDetailPage() {
   const params = useParams();
-  const containerId = params?.containerId as string;
+  const containerId = params.containerId as string;
   const { data: container, isLoading } = useContainer(containerId);
   const fallbackMutation = useTriggerDpdFallback();
   const [isSimulating, setIsSimulating] = useState(false);
 
   if (isLoading) {
     return (
-      <div className="py-20 text-center text-slate-400">
-        Loading container operational record...
+      <div className="py-24 text-center text-xs text-slate-400">
+        Loading container telemetry and multi-clock audit data...
       </div>
     );
   }
 
   if (!container) {
     return (
-      <div className="py-20 text-center space-y-3">
-        <h2 className="text-xl font-bold text-slate-800">Container Not Found</h2>
-        <Link href="/containers" className="text-blue-600 text-xs hover:underline">
-          &larr; Back to Container List
+      <div className="py-24 text-center space-y-3">
+        <h2 className="text-xl font-bold text-slate-900 dark:text-white">Container Not Found</h2>
+        <Link href="/containers" className="text-blue-600 dark:text-blue-400 text-xs hover:underline">
+          &larr; Back to Active Containers
         </Link>
       </div>
     );
@@ -66,7 +60,7 @@ export default function ContainerDetailPage() {
         <div className="flex items-center gap-2">
           <Link
             href="/containers"
-            className="p-1.5 bg-white dark:bg-[#1e293b] border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-lg transition-colors"
+            className="p-1.5 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-lg transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
           </Link>
@@ -103,7 +97,7 @@ export default function ContainerDetailPage() {
 
           <Link
             href={`/containers/${container.id}/documents`}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white dark:bg-[#1e293b] border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 font-semibold text-xs rounded-lg shadow-sm transition-colors"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/10 font-semibold text-xs rounded-lg shadow-sm transition-colors"
           >
             <FileText className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
             <span>Document Side-by-Side</span>
@@ -114,13 +108,13 @@ export default function ContainerDetailPage() {
       {/* Snapshot Cards Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {/* Exposure */}
-        <div className="bg-white dark:bg-[#1e293b] rounded-xl border border-slate-200 dark:border-slate-700 p-4 shadow-sm transition-colors">
-          <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+        <div className="bg-white dark:bg-[#0c1424] rounded-xl border border-slate-200 dark:border-white/5 p-4 shadow-sm dark:shadow-[0_4px_24px_rgba(0,0,0,0.3)] transition-colors">
+          <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
             Current Demurrage Exposure
           </div>
           <div
             className={`text-2xl font-extrabold font-mono mt-1 ${
-              container.currentExposureINR > 0 ? "text-rose-600 dark:text-rose-400" : "text-slate-800 dark:text-slate-100"
+              container.currentExposureINR > 0 ? "text-rose-600 dark:text-rose-400" : "text-slate-900 dark:text-white"
             }`}
           >
             {formatINR(container.currentExposureINR)}
@@ -131,11 +125,11 @@ export default function ContainerDetailPage() {
         </div>
 
         {/* Vessel & Shipping Line */}
-        <div className="bg-white dark:bg-[#1e293b] rounded-xl border border-slate-200 dark:border-slate-700 p-4 shadow-sm transition-colors">
-          <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+        <div className="bg-white dark:bg-[#0c1424] rounded-xl border border-slate-200 dark:border-white/5 p-4 shadow-sm dark:shadow-[0_4px_24px_rgba(0,0,0,0.3)] transition-colors">
+          <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
             Shipping Line / Vessel
           </div>
-          <div className="text-sm font-bold text-slate-800 dark:text-slate-100 mt-1 truncate">
+          <div className="text-sm font-bold text-slate-900 dark:text-white mt-1 truncate">
             {container.shippingLine}
           </div>
           <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">
@@ -144,11 +138,11 @@ export default function ContainerDetailPage() {
         </div>
 
         {/* Port of Discharge */}
-        <div className="bg-white dark:bg-[#1e293b] rounded-xl border border-slate-200 dark:border-slate-700 p-4 shadow-sm transition-colors">
-          <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+        <div className="bg-white dark:bg-[#0c1424] rounded-xl border border-slate-200 dark:border-white/5 p-4 shadow-sm dark:shadow-[0_4px_24px_rgba(0,0,0,0.3)] transition-colors">
+          <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
             Discharge Port &amp; Yard
           </div>
-          <div className="text-sm font-bold text-slate-800 dark:text-slate-100 mt-1 truncate">
+          <div className="text-sm font-bold text-slate-900 dark:text-white mt-1 truncate">
             {container.portOfDischarge}
           </div>
           <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">
@@ -157,11 +151,11 @@ export default function ContainerDetailPage() {
         </div>
 
         {/* Free Days Status */}
-        <div className="bg-white dark:bg-[#1e293b] rounded-xl border border-slate-200 dark:border-slate-700 p-4 shadow-sm transition-colors">
-          <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+        <div className="bg-white dark:bg-[#0c1424] rounded-xl border border-slate-200 dark:border-white/5 p-4 shadow-sm dark:shadow-[0_4px_24px_rgba(0,0,0,0.3)] transition-colors">
+          <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
             Carrier Free Time
           </div>
-          <div className="text-sm font-bold text-slate-800 dark:text-slate-100 mt-1">
+          <div className="text-sm font-bold text-slate-900 dark:text-white mt-1">
             {container.twoClocks.carrierClock.daysOverdue > 0 ? (
               <span className="text-rose-600 dark:text-rose-400 font-bold">
                 {container.twoClocks.carrierClock.daysOverdue} Days Overdue
@@ -186,8 +180,8 @@ export default function ContainerDetailPage() {
         {/* Left Column (7 cols) */}
         <div className="lg:col-span-7 space-y-6">
           {/* Financial Breakdown Table */}
-          <div className="bg-white dark:bg-[#1e293b] rounded-xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm space-y-3 transition-colors">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+          <div className="bg-white dark:bg-[#0c1424] rounded-xl border border-slate-200 dark:border-white/5 p-5 shadow-sm dark:shadow-[0_4px_24px_rgba(0,0,0,0.3)] space-y-3 transition-colors">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/5 pb-3">
               <div className="flex items-center gap-2">
                 <Receipt className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                 <h3 className="font-semibold text-slate-900 dark:text-white text-sm">
@@ -204,7 +198,7 @@ export default function ContainerDetailPage() {
                 No active charges accrued. Container is within free time.
               </div>
             ) : (
-              <div className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
+              <div className="divide-y divide-slate-100 dark:divide-white/5 text-xs">
                 {container.charges.map((charge, idx) => (
                   <div key={idx} className="py-2.5 flex items-center justify-between">
                     <div>
@@ -216,12 +210,12 @@ export default function ContainerDetailPage() {
                           </span>
                         )}
                       </div>
-                      <div className="text-[11px] text-slate-400 dark:text-slate-500">
+                      <div className="text-[11px] text-slate-500 dark:text-slate-400">
                         Basis: {charge.clockBasis} • {charge.daysBilled} days billed @ ₹
                         {charge.dailyRate.toLocaleString("en-IN")}/day
                       </div>
                     </div>
-                    <div className="font-bold font-mono text-slate-800 dark:text-slate-200 text-sm">
+                    <div className="font-bold font-mono text-slate-900 dark:text-white text-sm">
                       {formatINR(charge.amount)}
                     </div>
                   </div>
@@ -243,8 +237,8 @@ export default function ContainerDetailPage() {
           />
 
           {/* Quick Tasks Card */}
-          <div className="bg-white dark:bg-[#1e293b] rounded-xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm space-y-3 transition-colors">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3">
+          <div className="bg-white dark:bg-[#0c1424] rounded-xl border border-slate-200 dark:border-white/5 p-5 shadow-sm dark:shadow-[0_4px_24px_rgba(0,0,0,0.3)] space-y-3 transition-colors">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/5 pb-3">
               <div className="flex items-center gap-2">
                 <CheckSquare className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                 <h3 className="font-semibold text-slate-900 dark:text-white text-sm">Associated Tasks</h3>
@@ -258,7 +252,7 @@ export default function ContainerDetailPage() {
             </div>
 
             <div className="space-y-2">
-              <div className="p-3 bg-slate-50 dark:bg-slate-900/60 rounded-lg border border-slate-200 dark:border-slate-700 text-xs space-y-1.5">
+              <div className="p-3 bg-slate-50 dark:bg-white/5 rounded-lg border border-slate-200 dark:border-white/10 text-xs space-y-1.5">
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-slate-800 dark:text-slate-200">
                     Transporter Pickup Handoff
